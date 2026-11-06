@@ -1,10 +1,11 @@
 <script lang="ts">
   import { loadState, saveState } from './lib/storage';
   import { addCourse, updateCourse, deleteCourse, countTasksOf, updateMeta, resetState } from './lib/actions';
+  import { addTask, toggleTask, deleteTask, validateTaskForm } from './lib/tasks';
   import { validateMetaForm } from './lib/validation';
   import { groupByDay, totalSks } from './lib/schedule';
   import { todayWib } from './lib/view';
-  import type { Course } from './lib/types';
+  import type { Course, Task } from './lib/types';
   import Header from './components/Header.svelte';
   import DayGroup from './components/DayGroup.svelte';
   import Motivation from './components/Motivation.svelte';
@@ -31,6 +32,16 @@
   let resetDialog: HTMLDialogElement;
   let headerDialog: HTMLDialogElement;
 
+  let taskFormCourseId: string | null = null;
+  let taskValues = { title: '', due: '' };
+  let taskErrors: Partial<Record<'title' | 'due', string>> = {};
+  let taskFormTrigger: HTMLButtonElement | null = null;
+
+let taskDeleteOpen = false;
+let taskDeleteTarget: { id: string; title: string; courseId: string } | null = null;
+let taskDeleteTrigger: HTMLButtonElement | null = null;
+  let taskDeleteDialog: HTMLDialogElement;
+
   $: sksTotal = totalSks(courses);
   $: groups = groupByDay(courses);
   $: today = todayWib();
@@ -41,6 +52,8 @@
   $: if (!showResetDialog) resetDialog?.close();
   $: if (showHeaderDialog) headerDialog?.showModal();
   $: if (!showHeaderDialog) headerDialog?.close();
+  $: if (taskDeleteOpen) taskDeleteDialog?.showModal();
+  $: if (!taskDeleteOpen) taskDeleteDialog?.close();
 
   function openAddForm() {
     editingId = null;
@@ -115,6 +128,56 @@
       headerErrors = newErrors;
     }
   }
+
+  function openTaskForm(courseId: string, trigger: HTMLButtonElement) {
+    taskFormCourseId = courseId;
+    taskFormTrigger = trigger;
+    taskValues = { title: '', due: '' };
+    taskErrors = {};
+  }
+
+  function closeTaskForm() {
+    taskFormTrigger?.focus();
+    taskFormTrigger = null;
+    taskFormCourseId = null;
+  }
+
+  function onTaskInputChange(field: 'title' | 'due', value: string) {
+    taskValues = { ...taskValues, [field]: value };
+    if (taskErrors[field]) {
+      const newErrors = { ...taskErrors };
+      delete newErrors[field];
+      taskErrors = newErrors;
+    }
+  }
+
+  function onTaskSave() {
+    if (!taskFormCourseId) return;
+    const result = validateTaskForm(taskValues);
+    if (result.ok) {
+      state = addTask(state, taskFormCourseId, result.value);
+      saveState(state);
+      closeTaskForm();
+    } else {
+      taskErrors = result.errors;
+    }
+  }
+
+  function openTaskDelete(task: Task, trigger: HTMLButtonElement) {
+    taskDeleteTarget = { id: task.id, title: task.title, courseId: task.courseId };
+    taskDeleteTrigger = trigger;
+    taskDeleteOpen = true;
+  }
+
+  function confirmTaskDelete() {
+    if (!taskDeleteTarget) return;
+    state = deleteTask(state, taskDeleteTarget.id);
+    saveState(state);
+    taskDeleteOpen = false;
+    taskDeleteTrigger?.focus();
+    taskDeleteTarget = null;
+    taskDeleteTrigger = null;
+  }
 </script>
 
 <main>
@@ -143,8 +206,24 @@
         day={group.day}
         courses={group.courses}
         isToday={group.day === today}
+        state={state}
         onDelete={onDelete}
         onEdit={openEditForm}
+        onAddTask={openTaskForm}
+        onToggleTask={(id) => {
+          state = toggleTask(state, id);
+          saveState(state);
+        }}
+        onDeleteTask={(taskId, trigger) => {
+          const task = state.tasks.find((t) => t.id === taskId);
+          if (task) openTaskDelete(task, trigger);
+        }}
+        taskFormCourseId={taskFormCourseId}
+        {taskValues}
+        {taskErrors}
+        onTaskInputChange={onTaskInputChange}
+        onTaskSave={onTaskSave}
+        onTaskClose={closeTaskForm}
       />
     {/each}
   {/if}
@@ -217,6 +296,16 @@
         <button type="submit" class="button-primary">Simpan</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog bind:this={taskDeleteDialog}>
+    {#if taskDeleteTarget}
+      <p class="dialog__body">Hapus tugas "{taskDeleteTarget.title}"?</p>
+    {/if}
+    <div class="dialog__actions">
+      <button type="button" class="button-cancel" onclick={() => { taskDeleteOpen = false; taskDeleteTarget = null; }}>Batal</button>
+      <button type="button" class="button-delete" onclick={confirmTaskDelete}>Hapus</button>
+    </div>
   </dialog>
 </main>
 
