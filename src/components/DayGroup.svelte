@@ -5,6 +5,8 @@
   export let day: Day;
   export let courses: Course[];
   export let isToday: boolean;
+  export let onDelete: (course: Course) => void = () => {};
+  export let onEdit: (course: Course) => void = () => {};
 </script>
 
 <section class="day-group" aria-current={isToday ? 'date' : undefined}>
@@ -16,7 +18,11 @@
   </h2>
   <ul class="day-group__list">
     {#each courses as course}
-      <CourseCard {course} />
+      <CourseCard
+        {course}
+        onDelete={() => onDelete(course)}
+        onEdit={() => onEdit(course)}
+      />
     {/each}
   </ul>
 </section>
