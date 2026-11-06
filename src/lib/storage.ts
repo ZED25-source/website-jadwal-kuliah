@@ -4,7 +4,7 @@ import { createDefaultState } from './defaults';
 
 export const STORAGE_KEY = 'jadwal-kuliah:v1';
 
-const TIME_REGEX = /^\d{2}:\d{2}$/;
+const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function validateCourse(raw: unknown): Course | null {
   if (!raw || typeof raw !== 'object') return null;
@@ -78,6 +78,19 @@ function validateTask(raw: unknown): Task | null {
     createdAt,
   };
   if (t.due !== undefined) task.due = t.due;
+
+  const dueTimeRaw = t.dueTime;
+  if (dueTimeRaw !== undefined) {
+    const dueTimeValid =
+      typeof dueTimeRaw === 'string' &&
+      TIME_REGEX.test(dueTimeRaw) &&
+      task.due !== undefined;
+    if (dueTimeValid) {
+      task.dueTime = dueTimeRaw;
+    }
+    // invalid dueTime → dropped, task kept
+  }
+
   return task;
 }
 

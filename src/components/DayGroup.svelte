@@ -14,9 +14,9 @@
   export let onToggleTask: (taskId: string) => void = () => {};
   export let onDeleteTask: (taskId: string, trigger: HTMLButtonElement) => void = () => {};
   export let taskFormCourseId: string | null = null;
-  export let taskValues: { title: string; due: string } = { title: '', due: '' };
-  export let taskErrors: Partial<Record<'title' | 'due', string>> = {};
-  export let onTaskInputChange: (field: 'title' | 'due', value: string) => void = () => {};
+  export let taskValues: { title: string; due: string; dueTime?: string } = { title: '', due: '' };
+  export let taskErrors: Partial<Record<'title' | 'due' | 'dueTime', string>> = {};
+  export let onTaskInputChange: (field: 'title' | 'due' | 'dueTime', value: string) => void = () => {};
   export let onTaskSave: () => void = () => {};
   export let onTaskClose: () => void = () => {};
 

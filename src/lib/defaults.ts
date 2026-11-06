@@ -132,7 +132,7 @@ export const DEFAULT_COURSES: Course[] = [
 export const MOTIVATION = [
   'Semangat Kuliah!',
   'Belajar hari ini, sukses nanti!',
-  '"Disiplin hari ini adalah investasi terbaik untuk masa depanmu."',
+  '"Masa Depan Adalah Milik Mereka yang Menyiapkan Hari Ini"',
 ];
 
 export function createDefaultState(): AppState {

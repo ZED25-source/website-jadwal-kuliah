@@ -22,6 +22,12 @@
   --text-muted: #64748B;
   --accent: var(--navy);
 
+  /* Status tokens */
+  --danger: #DC2626;
+  --on-danger: #FFFFFF;
+  --success: #55A64E;
+  --on-success: #1E293B;
+
   /* Spacing scale */
   --space-1: 4px;
   --space-2: 8px;

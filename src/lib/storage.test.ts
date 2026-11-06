@@ -97,6 +97,93 @@ describe('validateState', () => {
     expect(state).not.toBeNull();
     expect(state!.tasks.map((t) => t.id)).toEqual(['t1']);
   });
+
+  it('dueTime valid dipertahankan', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, due: '2026-11-06', dueTime: '14:00', createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBe('14:00');
+  });
+
+  it('dueTime "25:00" dibuang, tugas tetap dipertahankan', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, due: '2026-11-06', dueTime: '25:00', createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBeUndefined();
+    expect(state!.tasks[0].due).toBe('2026-11-06');
+  });
+
+  it('dueTime "9:5" (format salah) dibuang, tugas tetap dipertahankan', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, due: '2026-11-06', dueTime: '9:5', createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBeUndefined();
+  });
+
+  it('dueTime berupa angka dibuang, tugas tetap dipertahankan', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, due: '2026-11-06', dueTime: 12345, createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBeUndefined();
+  });
+
+  it('dueTime tanpa due dibuang, tugas tetap dipertahankan', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, dueTime: '14:00', createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBeUndefined();
+    expect(state!.tasks[0].due).toBeUndefined();
+  });
+
+  it('data lama tanpa dueTime tidak berubah', () => {
+    const state = validateState({
+      schemaVersion: 1,
+      seeded: true,
+      meta: { title: 't', program: 'p', semester: 's' },
+      courses: [{ id: 'a', day: 'Senin', start: '07:30', end: '09:10', name: 'A' }],
+      tasks: [
+        { id: 't1', courseId: 'a', title: 'T1', done: false, due: '2026-11-06', createdAt: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(state).not.toBeNull();
+    expect(state!.tasks[0].dueTime).toBeUndefined();
+    expect(state!.tasks[0].due).toBe('2026-11-06');
+  });
 });
 
 describe('loadState', () => {

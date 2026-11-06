@@ -5,65 +5,93 @@
   import { validateMetaForm } from './lib/validation';
   import { groupByDay, totalSks } from './lib/schedule';
   import { todayWib } from './lib/view';
+  import { getJakartaParts } from './lib/today';
   import type { Course, Task, AppState } from './lib/types';
   import Header from './components/Header.svelte';
+  import Hero from './components/Hero.svelte';
+  import WeekOverview from './components/WeekOverview.svelte';
   import DayGroup from './components/DayGroup.svelte';
-  import Motivation from './components/Motivation.svelte';
+  import Sidebar from './components/Sidebar.svelte';
   import CourseForm from './components/CourseForm.svelte';
   import StorageNotice from './components/StorageNotice.svelte';
-  import DataTools from './components/DataTools.svelte';
   import BackgroundDecor from './components/BackgroundDecor.svelte';
+  import { onMount } from 'svelte';
 
   const loaded = loadState();
-  let state = loaded.state;
+  let stateStore = $state(loaded.state);
   const storagePersistent = loaded.persistent;
-  let lastSaveOk = true;
+  let lastSaveOk = $state(true);
+
+  // Dev-only: override current time via URL parameter ?now=2026-11-05T08:30:00+07:00
+  let overrideNow: Date | undefined = undefined;
+  if (import.meta.env.DEV) {
+    const params = new URLSearchParams(window.location.search);
+    const nowParam = params.get('now');
+    if (nowParam) {
+      const parsed = new Date(nowParam);
+      if (!isNaN(parsed.getTime())) {
+        overrideNow = parsed;
+      }
+    }
+  }
 
   function persist(nextState: AppState) {
     lastSaveOk = saveState(nextState);
   }
 
-  $: meta = state.meta;
-  $: courses = state.courses;
+  let appState = $derived(stateStore);
 
-  let showForm = false;
-  let editingId: string | null = null;
+  let meta = $derived(appState.meta);
+  let courses = $derived(appState.courses);
 
-  let showDeleteDialog = false;
-  let deleteTarget: { id: string; name: string } | null = null;
+  let showForm = $state(false);
+  let editingId = $state<string | null>(null);
 
-  let showResetDialog = false;
+  let showDeleteDialog = $state(false);
+  let deleteTarget = $state<{ id: string; name: string } | null>(null);
 
-  let showHeaderDialog = false;
-  let headerValues = { title: state.meta.title, program: state.meta.program, semester: state.meta.semester };
-  let headerErrors: Partial<Record<'title' | 'program' | 'semester', string>> = {};
+  let showResetDialog = $state(false);
+
+  let showHeaderDialog = $state(false);
+  let headerValues = $state({ title: '', program: '', semester: '' });
+  let headerErrors = $state<Partial<Record<'title' | 'program' | 'semester', string>>>({});
 
   let deleteDialog: HTMLDialogElement;
   let resetDialog: HTMLDialogElement;
   let headerDialog: HTMLDialogElement;
 
-  let taskFormCourseId: string | null = null;
-  let taskValues = { title: '', due: '' };
-  let taskErrors: Partial<Record<'title' | 'due', string>> = {};
-  let taskFormTrigger: HTMLButtonElement | null = null;
+  let taskFormCourseId = $state<string | null>(null);
+  let taskValues = $state({ title: '', due: '', dueTime: '' });
+  let taskErrors = $state<Partial<Record<'title' | 'due' | 'dueTime', string>>>({});
+  let taskFormTrigger = $state<HTMLButtonElement | null>(null);
 
-  let taskDeleteOpen = false;
-  let taskDeleteTarget: { id: string; title: string; courseId: string } | null = null;
-  let taskDeleteTrigger: HTMLButtonElement | null = null;
+  let taskDeleteOpen = $state(false);
+  let taskDeleteTarget = $state<{ id: string; title: string; courseId: string } | null>(null);
+  let taskDeleteTrigger = $state<HTMLButtonElement | null>(null);
   let taskDeleteDialog: HTMLDialogElement;
 
-  $: sksTotal = totalSks(courses);
-  $: groups = groupByDay(courses);
-  $: today = todayWib();
-  $: todayEmpty = courses.length > 0 && !groups.some((g) => g.day === today);
-  $: if (showDeleteDialog) deleteDialog?.showModal();
-  $: if (!showDeleteDialog) deleteDialog?.close();
-  $: if (showResetDialog) resetDialog?.showModal();
-  $: if (!showResetDialog) resetDialog?.close();
-  $: if (showHeaderDialog) headerDialog?.showModal();
-  $: if (!showHeaderDialog) headerDialog?.close();
-  $: if (taskDeleteOpen) taskDeleteDialog?.showModal();
-  $: if (!taskDeleteOpen) taskDeleteDialog?.close();
+  let sksTotal = $derived(totalSks(courses));
+  let groups = $derived(groupByDay(courses));
+  let today = $derived(todayWib());
+  let todayDay = $derived(getJakartaParts(new Date()).day);
+  let todayEmpty = $derived(courses.length > 0 && !groups.some((g) => g.day === today));
+
+  $effect(() => {
+    if (showDeleteDialog) deleteDialog?.showModal();
+    if (!showDeleteDialog) deleteDialog?.close();
+  });
+  $effect(() => {
+    if (showResetDialog) resetDialog?.showModal();
+    if (!showResetDialog) resetDialog?.close();
+  });
+  $effect(() => {
+    if (showHeaderDialog) headerDialog?.showModal();
+    if (!showHeaderDialog) headerDialog?.close();
+  });
+  $effect(() => {
+    if (taskDeleteOpen) taskDeleteDialog?.showModal();
+    if (!taskDeleteOpen) taskDeleteDialog?.close();
+  });
 
   function openAddForm() {
     editingId = null;
@@ -82,11 +110,11 @@
 
   function onFormSave(values: Omit<Course, 'id'>) {
     if (editingId) {
-      state = updateCourse(state, editingId, values);
+      stateStore = updateCourse(appState, editingId, values);
     } else {
-      state = addCourse(state, values);
+      stateStore = addCourse(appState, values);
     }
-    persist(state);
+    persist(appState);
     closeForm();
   }
 
@@ -97,15 +125,15 @@
 
   function confirmDelete() {
     if (!deleteTarget) return;
-    state = deleteCourse(state, deleteTarget.id);
-    persist(state);
+    stateStore = deleteCourse(appState, deleteTarget.id);
+    persist(appState);
     showDeleteDialog = false;
     deleteTarget = null;
   }
 
   function onReset() {
-    state = resetState();
-    persist(state);
+    stateStore = resetState();
+    persist(appState);
     showResetDialog = false;
   }
 
@@ -122,8 +150,8 @@
   function onHeaderSubmit() {
     const result = validateMetaForm(headerValues);
     if (result.ok) {
-      state = updateMeta(state, result.value);
-      persist(state);
+      stateStore = updateMeta(appState, result.value);
+      persist(appState);
       closeHeaderDialog();
     } else {
       headerErrors = result.errors;
@@ -142,7 +170,7 @@
   function openTaskForm(courseId: string, trigger: HTMLButtonElement) {
     taskFormCourseId = courseId;
     taskFormTrigger = trigger;
-    taskValues = { title: '', due: '' };
+    taskValues = { title: '', due: '', dueTime: '' };
     taskErrors = {};
   }
 
@@ -152,8 +180,11 @@
     taskFormCourseId = null;
   }
 
-  function onTaskInputChange(field: 'title' | 'due', value: string) {
+  function onTaskInputChange(field: 'title' | 'due' | 'dueTime', value: string) {
     taskValues = { ...taskValues, [field]: value };
+    if (field === 'due' && value === '') {
+      taskValues = { ...taskValues, dueTime: '' };
+    }
     if (taskErrors[field]) {
       const newErrors = { ...taskErrors };
       delete newErrors[field];
@@ -165,8 +196,8 @@
     if (!taskFormCourseId) return;
     const result = validateTaskForm(taskValues);
     if (result.ok) {
-      state = addTask(state, taskFormCourseId, result.value);
-      persist(state);
+      stateStore = addTask(appState, taskFormCourseId, result.value);
+      persist(appState);
       closeTaskForm();
     } else {
       taskErrors = result.errors;
@@ -181,8 +212,8 @@
 
   function confirmTaskDelete() {
     if (!taskDeleteTarget) return;
-    state = deleteTask(state, taskDeleteTarget.id);
-    persist(state);
+    stateStore = deleteTask(appState, taskDeleteTarget.id);
+    persist(appState);
     taskDeleteOpen = false;
     taskDeleteTrigger?.focus();
     taskDeleteTarget = null;
@@ -190,19 +221,119 @@
   }
 
   function onImportConfirmed(nextState: AppState) {
-    state = nextState;
-    persist(state);
+    stateStore = nextState;
+    persist(appState);
   }
+
+  function handleSidebarAddTask(courseId: string, value: { title: string; due?: string; dueTime?: string }) {
+    stateStore = addTask(appState, courseId, value);
+    persist(appState);
+  }
+
+  // Single "now" source for the whole app (WIB). ?now= override stays static; otherwise ticks every 60s.
+  let currentTime = $state(overrideNow ?? new Date());
+
+  onMount(() => {
+    if (overrideNow) return; // don't tick when time is overridden
+    const interval = window.setInterval(() => {
+      currentTime = new Date();
+    }, 60000);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  });
 </script>
 
-<BackgroundDecor />
-
-<main class="main">
-  <StorageNotice persistent={storagePersistent} {lastSaveOk} />
+<div class="app">
+  <BackgroundDecor />
 
   <Header {meta} totalSks={sksTotal} onEditHeader={openHeaderDialog} />
 
-  <button class="button-add" onclick={openAddForm}>Tambah mata kuliah</button>
+  <div class="page">
+    <StorageNotice persistent={storagePersistent} {lastSaveOk} />
+
+    <div class="layout">
+      <main>
+      {#if courses.length > 0}
+        <Hero {appState} {currentTime} />
+
+        <div class="week-overview-wrapper">
+          <WeekOverview
+            {appState}
+            {todayDay}
+            onDelete={onDelete}
+            onEdit={openEditForm}
+            onAddTask={openTaskForm}
+            onToggleTask={(id) => {
+              stateStore = toggleTask(appState, id);
+              persist(appState);
+            }}
+            onDeleteTask={(taskId, trigger) => {
+              const task = appState.tasks.find((t) => t.id === taskId);
+              if (task) openTaskDelete(task, trigger);
+            }}
+            taskFormCourseId={taskFormCourseId}
+            {taskValues}
+            {taskErrors}
+            onTaskInputChange={onTaskInputChange}
+            onTaskSave={onTaskSave}
+            onTaskClose={closeTaskForm}
+          />
+        </div>
+      {:else}
+        <p class="empty">Belum ada jadwal mata kuliah.</p>
+      {/if}
+
+      <div class="day-groups-wrapper">
+        {#if courses.length > 0}
+          {#if todayEmpty}
+            <p class="empty">Tidak ada kuliah hari ini</p>
+          {/if}
+          {#each groups as group}
+            <DayGroup
+              day={group.day}
+              courses={group.courses}
+              isToday={group.day === today}
+              state={appState}
+              onDelete={onDelete}
+              onEdit={openEditForm}
+              onAddTask={openTaskForm}
+              onToggleTask={(id) => {
+                stateStore = toggleTask(appState, id);
+                persist(appState);
+              }}
+              onDeleteTask={(taskId, trigger) => {
+                const task = appState.tasks.find((t) => t.id === taskId);
+                if (task) openTaskDelete(task, trigger);
+              }}
+              taskFormCourseId={taskFormCourseId}
+              {taskValues}
+              {taskErrors}
+              onTaskInputChange={onTaskInputChange}
+              onTaskSave={onTaskSave}
+              onTaskClose={closeTaskForm}
+            />
+          {/each}
+        {/if}
+      </div>
+      </main>
+
+      <aside>
+        <Sidebar
+          {appState}
+          onAddCourse={openAddForm}
+          onToggleTask={(id) => {
+            stateStore = toggleTask(appState, id);
+            persist(appState);
+          }}
+          onDeleteTask={(task, trigger) => openTaskDelete(task, trigger)}
+          onAddTask={handleSidebarAddTask}
+          {onImportConfirmed}
+          {currentTime}
+        />
+      </aside>
+    </div>
+  </div>
 
   {#if showForm}
     <CourseForm
@@ -214,51 +345,14 @@
     />
   {/if}
 
-  {#if courses.length === 0}
-    <p class="empty">Belum ada jadwal mata kuliah.</p>
-  {:else}
-    {#if todayEmpty}
-      <p class="empty">Tidak ada kuliah hari ini</p>
-    {/if}
-    {#each groups as group}
-      <DayGroup
-        day={group.day}
-        courses={group.courses}
-        isToday={group.day === today}
-        state={state}
-        onDelete={onDelete}
-        onEdit={openEditForm}
-        onAddTask={openTaskForm}
-        onToggleTask={(id) => {
-          state = toggleTask(state, id);
-          persist(state);
-        }}
-        onDeleteTask={(taskId, trigger) => {
-          const task = state.tasks.find((t) => t.id === taskId);
-          if (task) openTaskDelete(task, trigger);
-        }}
-        taskFormCourseId={taskFormCourseId}
-        {taskValues}
-        {taskErrors}
-        onTaskInputChange={onTaskInputChange}
-        onTaskSave={onTaskSave}
-        onTaskClose={closeTaskForm}
-      />
-    {/each}
-  {/if}
-
-  <Motivation />
-
-  <DataTools {state} onImportConfirmed={onImportConfirmed} />
-
   <dialog bind:this={deleteDialog} class="dialog">
     {#if deleteTarget}
       <p class="dialog__body">
         Hapus "{deleteTarget.name}"?
         <br />
-        {countTasksOf(state, deleteTarget.id) === 0
+        {countTasksOf(appState, deleteTarget.id) === 0
           ? 'Tidak ada tugas yang terhapus.'
-          : `Tugas yang ikut terhapus: ${countTasksOf(state, deleteTarget.id)}`}
+          : `Tugas yang ikut terhapus: ${countTasksOf(appState, deleteTarget.id)}`}
       </p>
     {/if}
     <div class="dialog__actions">
@@ -328,44 +422,52 @@
       <button type="button" class="button-delete" onclick={confirmTaskDelete}>Hapus</button>
     </div>
   </dialog>
-</main>
+</div>
 
 <style>
-  .main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--space-6) var(--space-5);
+  .app {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .page {
     position: relative;
     z-index: 1;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: var(--space-5);
   }
 
   @media (min-width: 768px) {
-    .main {
-      padding: var(--space-8) var(--space-7);
+    .page {
+      padding-inline: var(--space-7);
     }
   }
 
-  .button-add {
-    font-size: var(--font-size-body);
-    padding: var(--space-3) var(--space-6);
-    background: var(--navy);
-    color: var(--text-on-navy);
-    border: none;
-    border-radius: var(--radius-pill);
-    cursor: pointer;
-    font-weight: 700;
-    margin-bottom: var(--space-6);
-    box-shadow: var(--shadow-soft);
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+    padding: var(--space-4) 0;
   }
 
-  .button-add:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  @media (min-width: 1360px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+
+    aside {
+      position: sticky;
+      top: var(--space-5);
+      max-height: calc(100vh - 2 * var(--space-5));
+      overflow-y: auto;
+    }
   }
 
-  .button-add:hover {
-    background: var(--royal);
-    box-shadow: var(--shadow-medium);
+  main,
+  aside {
+    min-width: 0;
   }
 
   .empty {
@@ -514,4 +616,24 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+
+  .week-overview-wrapper {
+    display: block;
+  }
+
+  .day-groups-wrapper {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .week-overview-wrapper {
+      display: none;
+    }
+
+    .day-groups-wrapper {
+      display: block;
+    }
+  }
 </style>
+
+

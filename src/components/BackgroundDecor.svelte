@@ -24,8 +24,11 @@
     <path d="M 0,100 Q 300,120 600,100 T 1200,100 L 1200,200 L 0,200 Z" fill="var(--light-blue)" />
   </svg>
 
-  <svg class="bg-decor__arch" viewBox="0 0 800 600" preserveAspectRatio="none">
-    <path d="M 0,600 L 0,200 Q 200,100 400,200 T 800,200 L 800,600 Z" fill="var(--bg-card)" opacity="0.95" />
+  <svg class="bg-decor__monitor" viewBox="0 0 120 100">
+    <rect x="10" y="15" width="100" height="65" fill="none" stroke="var(--grid-gray)" stroke-width="2" rx="4" />
+    <rect x="20" y="25" width="80" height="45" fill="var(--light-blue)" opacity="0.3" />
+    <line x1="45" y1="80" x2="75" y2="80" stroke="var(--grid-gray)" stroke-width="2" />
+    <rect x="35" y="80" width="50" height="8" fill="var(--grid-gray)" rx="2" />
   </svg>
 
   <svg class="bg-decor__lines" viewBox="0 0 400 400">
@@ -33,21 +36,11 @@
     <line x1="150" y1="0" x2="150" y2="400" stroke="var(--grid-gray)" stroke-width="1" stroke-dasharray="6,10" opacity="0.3" />
     <line x1="0" y1="100" x2="400" y2="100" stroke="var(--grid-gray)" stroke-width="1" stroke-dasharray="10,15" opacity="0.3" />
   </svg>
-
-  <svg class="bg-decor__blueprint" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
-    <rect x="20" y="20" width="80" height="60" fill="none" stroke="var(--royal)" stroke-width="0.5" opacity="0.15" />
-    <rect x="30" y="30" width="60" height="40" fill="none" stroke="var(--royal)" stroke-width="0.5" opacity="0.1" />
-    <line x1="110" y1="40" x2="160" y2="40" stroke="var(--royal)" stroke-width="0.5" opacity="0.12" />
-    <line x1="110" y1="50" x2="150" y2="50" stroke="var(--royal)" stroke-width="0.5" opacity="0.12" />
-    <line x1="110" y1="60" x2="155" y2="60" stroke="var(--royal)" stroke-width="0.5" opacity="0.12" />
-    <circle cx="50" cy="120" r="15" fill="none" stroke="var(--royal)" stroke-width="0.5" opacity="0.1" />
-    <polygon points="100,110 120,110 110,130" fill="none" stroke="var(--royal)" stroke-width="0.5" opacity="0.1" />
-  </svg>
 </div>
 
 <style>
   .bg-decor {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
@@ -74,8 +67,8 @@
 
   .bg-decor__dots {
     position: absolute;
-    top: 5%;
-    right: 10%;
+    top: 15%;
+    left: 8%;
     width: 100px;
     height: 100px;
   }
@@ -88,40 +81,33 @@
     height: 150px;
   }
 
-  .bg-decor__arch {
+  .bg-decor__monitor {
     position: absolute;
-    top: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 1400px;
-    height: 80vh;
+    top: 25%;
+    left: 5%;
+    width: 120px;
+    height: 100px;
+    opacity: 0.5;
   }
 
   .bg-decor__lines {
     position: absolute;
-    top: 20%;
-    left: 5%;
+    top: 35%;
+    left: 3%;
     width: 200px;
     height: 200px;
     opacity: 0.6;
   }
 
-  .bg-decor__blueprint {
-    position: absolute;
-    top: 50%;
-    right: 8%;
-    width: 150px;
-    height: 150px;
+  @media (max-width: 1359px) {
+    .bg-decor__monitor,
+    .bg-decor__dots,
+    .bg-decor__lines {
+      display: none;
+    }
   }
 
   @media (max-width: 768px) {
-    .bg-decor__dots,
-    .bg-decor__lines,
-    .bg-decor__blueprint {
-      display: none;
-    }
-
     .bg-decor__shape {
       width: 60vw;
       height: 60vw;

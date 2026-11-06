@@ -12,9 +12,9 @@ export let onAddTask: (courseId: string, trigger: HTMLButtonElement) => void = (
 export let onToggleTask: (taskId: string) => void = () => {};
 export let onDeleteTask: (taskId: string, trigger: HTMLButtonElement) => void = () => {};
 export let isAddingTask: boolean = false;
-export let taskValues: { title: string; due: string } = { title: '', due: '' };
-export let taskErrors: Partial<Record<'title' | 'due', string>> = {};
-export let onTaskInputChange: (field: 'title' | 'due', value: string) => void = () => {};
+export let taskValues: { title: string; due: string; dueTime?: string } = { title: '', due: '' };
+export let taskErrors: Partial<Record<'title' | 'due' | 'dueTime', string>> = {};
+export let onTaskInputChange: (field: 'title' | 'due' | 'dueTime', value: string) => void = () => {};
 export let onTaskSave: () => void = () => {};
 export let onTaskClose: () => void = () => {};
 export let isEven: boolean = false;
@@ -27,12 +27,13 @@ $: if (isAddingTask && titleInput) {
 }
 </script>
 
-<div class="course" class:course--even={isEven}>
-  <div class="course__time-col">
-    <time class="course__time" aria-label="{formatTime(course.start)} sampai {formatTime(course.end)}">
-      {formatTime(course.start)}<br />– {formatTime(course.end)}
-    </time>
-  </div>
+<div class="course-box">
+  <div class="course" class:course--even={isEven}>
+    <div class="course__time-col">
+      <time class="course__time" aria-label="{formatTime(course.start)} sampai {formatTime(course.end)}">
+        {formatTime(course.start)}<br />– {formatTime(course.end)}
+      </time>
+    </div>
 
   <div class="course__content-col">
     <h3 class="course__name">
@@ -101,6 +102,23 @@ $: if (isAddingTask && titleInput) {
             <p id="error-task-due-{course.id}" class="form-field__error">{taskErrors.due}</p>
           {/if}
         </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="task-due-time-{course.id}">Jam (WIB, opsional)</label>
+          <input
+            id="task-due-time-{course.id}"
+            type="time"
+            class="form-field__input"
+            disabled={!taskValues.due}
+            bind:value={taskValues.dueTime}
+            oninput={(e) => onTaskInputChange('dueTime', (e.target as HTMLInputElement).value)}
+            aria-invalid={!!taskErrors.dueTime}
+            aria-describedby={taskErrors.dueTime ? `error-task-due-time-${course.id}` : undefined}
+          />
+          {#if taskErrors.dueTime}
+            <p id="error-task-due-time-{course.id}" class="form-field__error">{taskErrors.dueTime}</p>
+          {/if}
+        </div>
         <div class="task-form__actions">
           <button type="button" class="button button--secondary" onclick={onTaskClose}>Batal</button>
           <button type="submit" class="button button--primary">Simpan</button>
@@ -124,16 +142,20 @@ $: if (isAddingTask && titleInput) {
       </button>
     </div>
   </div>
+  </div>
 </div>
 
 <style>
+  .course-box {
+    container-type: inline-size;
+  }
+
   .course {
     display: grid;
     grid-template-columns: 7rem minmax(12ch, 1fr) 9rem;
     gap: var(--space-4);
     padding: var(--space-5);
     border-bottom: var(--border-thin) solid var(--grid-gray);
-    container-type: inline-size;
   }
 
   .course:last-child {
@@ -209,8 +231,8 @@ $: if (isAddingTask && titleInput) {
   .course__task-badge {
     display: inline-block;
     padding: var(--space-1) var(--space-3);
-    background: var(--yellow);
-    color: var(--navy);
+    background: var(--danger);
+    color: var(--on-danger);
     border-radius: var(--radius-pill);
     font-size: var(--font-size-caption);
     font-weight: 700;

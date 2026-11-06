@@ -18,6 +18,7 @@ export interface Task {
   courseId: string;
   title: string;
   due?: string;
+  dueTime?: string; // opsional, format "HH:mm" WIB, hanya bermakna jika due terisi
   done: boolean;
   createdAt: string;
 }
@@ -32,4 +33,4 @@ export interface AppState {
 
 export const DAYS: Day[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 1; // unchanged: dueTime is optional, old data remains valid without migration

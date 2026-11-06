@@ -1,14 +1,17 @@
 <script lang="ts">
   import type { Task } from '../lib/types';
-  import { formatDateId } from '../lib/tasks';
+  import { formatDateId, isOverdue, getJakartaDateKey } from '../lib/tasks';
 
   export let tasks: Task[] = [];
   export let onToggle: (taskId: string) => void = () => {};
   export let onDelete: (taskId: string, trigger: HTMLButtonElement) => void = () => {};
+
+  const todayKey = getJakartaDateKey(new Date());
 </script>
 
 <ul class="task-list">
   {#each tasks as task}
+    {@const overdue = isOverdue(task, todayKey)}
     <li class="task-list__item" class:task-list__item--done={task.done}>
       <label class="task-list__label">
         <input
@@ -20,6 +23,8 @@
         <span class="task-list__title">{task.title}</span>
         {#if task.done}
           <span class="task-list__done-text">Selesai</span>
+        {:else if overdue}
+          <span class="task-list__overdue-text">Terlambat</span>
         {/if}
       </label>
       {#if task.due}
@@ -98,8 +103,15 @@
   }
 
   .task-list__done-text {
+    font-size: var(--font-size-body);
+    color: var(--success);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .task-list__overdue-text {
     font-size: var(--font-size-caption);
-    color: var(--green);
+    color: var(--danger);
     font-weight: 700;
     white-space: nowrap;
   }
@@ -107,7 +119,7 @@
   .task-list__due {
     font-size: var(--font-size-caption);
     color: var(--text);
-    background: var(--orange);
+    background: var(--grid-gray);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-pill);
     white-space: nowrap;
