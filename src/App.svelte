@@ -5,13 +5,22 @@
   import { validateMetaForm } from './lib/validation';
   import { groupByDay, totalSks } from './lib/schedule';
   import { todayWib } from './lib/view';
-  import type { Course, Task } from './lib/types';
+  import type { Course, Task, AppState } from './lib/types';
   import Header from './components/Header.svelte';
   import DayGroup from './components/DayGroup.svelte';
   import Motivation from './components/Motivation.svelte';
   import CourseForm from './components/CourseForm.svelte';
+  import StorageNotice from './components/StorageNotice.svelte';
+  import DataTools from './components/DataTools.svelte';
 
-  let state = loadState().state;
+  const loaded = loadState();
+  let state = loaded.state;
+  const storagePersistent = loaded.persistent;
+  let lastSaveOk = true;
+
+  function persist(nextState: AppState) {
+    lastSaveOk = saveState(nextState);
+  }
 
   $: meta = state.meta;
   $: courses = state.courses;
@@ -76,7 +85,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     } else {
       state = addCourse(state, values);
     }
-    saveState(state);
+    persist(state);
     closeForm();
   }
 
@@ -88,14 +97,14 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   function confirmDelete() {
     if (!deleteTarget) return;
     state = deleteCourse(state, deleteTarget.id);
-    saveState(state);
+    persist(state);
     showDeleteDialog = false;
     deleteTarget = null;
   }
 
   function onReset() {
     state = resetState();
-    saveState(state);
+    persist(state);
     showResetDialog = false;
   }
 
@@ -113,7 +122,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     const result = validateMetaForm(headerValues);
     if (result.ok) {
       state = updateMeta(state, result.value);
-      saveState(state);
+      persist(state);
       closeHeaderDialog();
     } else {
       headerErrors = result.errors;
@@ -156,7 +165,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     const result = validateTaskForm(taskValues);
     if (result.ok) {
       state = addTask(state, taskFormCourseId, result.value);
-      saveState(state);
+      persist(state);
       closeTaskForm();
     } else {
       taskErrors = result.errors;
@@ -172,15 +181,22 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   function confirmTaskDelete() {
     if (!taskDeleteTarget) return;
     state = deleteTask(state, taskDeleteTarget.id);
-    saveState(state);
+    persist(state);
     taskDeleteOpen = false;
     taskDeleteTrigger?.focus();
     taskDeleteTarget = null;
     taskDeleteTrigger = null;
   }
+
+  function onImportConfirmed(nextState: AppState) {
+    state = nextState;
+    persist(state);
+  }
 </script>
 
 <main>
+  <StorageNotice persistent={storagePersistent} {lastSaveOk} />
+
   <Header {meta} totalSks={sksTotal} onEditHeader={openHeaderDialog} />
 
   <button class="button-add" onclick={openAddForm}>Tambah mata kuliah</button>
@@ -212,7 +228,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
         onAddTask={openTaskForm}
         onToggleTask={(id) => {
           state = toggleTask(state, id);
-          saveState(state);
+          persist(state);
         }}
         onDeleteTask={(taskId, trigger) => {
           const task = state.tasks.find((t) => t.id === taskId);
@@ -229,6 +245,8 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   {/if}
 
   <Motivation />
+
+  <DataTools {state} onImportConfirmed={onImportConfirmed} />
 
   <dialog bind:this={deleteDialog}>
     {#if deleteTarget}
