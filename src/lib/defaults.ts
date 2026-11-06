@@ -3,7 +3,7 @@ import { SCHEMA_VERSION } from './types';
 
 export const DEFAULT_META = {
   title: 'JADWAL KULIAH TEKNIK INFORMATIKA',
-  program: 'W/TI',
+  program: 'S1',
   semester: 'Ganjil 2026/2027',
 };
 

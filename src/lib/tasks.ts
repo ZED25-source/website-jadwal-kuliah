@@ -192,6 +192,15 @@ export function formatDateId(dateStr: string): string {
   return `${d} ${BULAN_ID[m - 1]} ${y}`;
 }
 
+export function formatDueDateTime(dateStr: string, timeStr?: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const datePart = `${d} ${BULAN_ID[m - 1]} ${y}`;
+  if (timeStr) {
+    return `${datePart} · ${timeStr}`;
+  }
+  return datePart;
+}
+
 export function formatDue(task: Task): string {
   if (!task.due) return '';
   const datePart = formatDateId(task.due);

@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Alat impor/ekspor state aplikasi ke berkas JSON, dengan dialog konfirmasi impor.
   import type { AppState } from '../lib/types';
   import { exportState, parseImport } from '../lib/transfer';
 

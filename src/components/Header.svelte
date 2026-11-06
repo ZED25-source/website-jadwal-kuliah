@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Komponen header aplikasi: menampilkan judul, badge program/semester, total SKS,
+  // dan tombol untuk membuka dialog edit header.
   import type { AppState } from '../lib/types';
 
   export let meta: AppState['meta'];

@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Komponen item tunggal tugas: checkbox, judul, status selesai/terlambat, tanggal tenggat,
+  // dan tombol hapus.
   import type { Task } from '../lib/types';
   import { formatDateId, isOverdue, getJakartaDateKey } from '../lib/tasks';
 
@@ -10,7 +12,7 @@
 </script>
 
 <ul class="task-list">
-  {#each tasks as task}
+  {#each tasks as task (task.id)}
     {@const overdue = isOverdue(task, todayKey)}
     <li class="task-list__item" class:task-list__item--done={task.done}>
       <label class="task-list__label">

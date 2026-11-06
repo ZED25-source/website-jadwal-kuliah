@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Komponen tampilan desktop: grid kolom hari dengan chip mata kuliah dan dialog detail.
   import type { Course, AppState } from '../lib/types';
   import type { Day } from '../lib/types';
   import { groupByDay } from '../lib/schedule';
@@ -52,6 +53,7 @@
     'Minggu': 'royal',
   };
 
+  // Buka dialog detail matakuliah dan ingat tombol chip untuk kembalikan fokus.
   function openDetail(course: Course, chipButton: HTMLButtonElement) {
     selectedCourse = course;
     chipRefs.set(course.id, chipButton);
@@ -78,8 +80,9 @@
 
 <section class="week-overview" aria-label="Ringkasan mingguan">
   <h2 class="week-overview__title">Ringkasan Mingguan</h2>
+  <div class="week-overview__underline"></div>
   <div class="week-overview__grid">
-    {#each groups as group}
+    {#each groups as group (group.day)}
       {@const isToday = group.day === todayDay}
       {@const dayColor = dayColors[group.day]}
       <div class="week-overview__day">
@@ -92,7 +95,7 @@
           {group.day}
         </h3>
         <div class="week-overview__courses">
-          {#each group.courses as course}
+          {#each group.courses as course (course.id)}
             {@const openCount = openTaskCount(appState, course.id)}
             <CourseChip
               {course}
@@ -160,8 +163,16 @@
     font-size: var(--font-size-lead);
     font-weight: 700;
     color: var(--navy);
-    margin: 0 0 var(--space-4) 0;
+    margin: 0 0 var(--space-2) 0;
     line-height: 1.2;
+  }
+
+  .week-overview__underline {
+    width: 100%;
+    height: var(--border-medium);
+    background: var(--navy);
+    border-radius: var(--radius-sm);
+    margin-bottom: calc(var(--space-4) * 0.5);
   }
 
   .week-overview__grid {

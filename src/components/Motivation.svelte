@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Bagian motivasi: catatan motivasi (sticky note) dan banner kutipan.
   import { MOTIVATION } from '../lib/defaults';
   import Icons from './Icons.svelte';
 </script>

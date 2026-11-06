@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Peringatan penyimpanan: ditampilkan saat localStorage tidak tersedia atau gagal menyimpan.
   export let persistent: boolean = true;
   export let lastSaveOk: boolean = true;
 </script>

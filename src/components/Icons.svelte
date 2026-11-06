@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Komponen ikon SVG reusable: laptop, buku, kalender, kalkulator, atom, dll.
   export let name: 'laptop' | 'book' | 'plant' | 'graduation' | 'calendar' | 'calculator' | 'atom' | 'book-open' | 'flask' | 'pushpin' | 'paperclip';
   export let size = 24;
 </script>

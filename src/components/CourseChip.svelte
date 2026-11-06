@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Chip ringkas mata kuliah untuk WeekOverview: waktu, nama, ruang, dan badge status tugas.
   import type { Course, Task } from '../lib/types';
   import { formatTime } from '../lib/view';
   import { getCourseTaskStatus, type TaskStatus } from '../lib/tasks';

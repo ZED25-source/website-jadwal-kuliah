@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Dialog tambah/ubah mata kuliah: validasi formulir dan deteksi benturan jadwal.
   import type { Course, Day } from '../lib/types';
   import type { CourseFormValues } from '../lib/validation';
   import { validateCourseForm } from '../lib/validation';

@@ -1,4 +1,7 @@
 <script lang="ts">
+  // Komponen utama aplikasi Jadwal Kuliah.
+  // Mengelola state global (jadwal, tugas, meta header), menyimpan ke localStorage,
+  // dan mengatur seluruh alur UI: form mata kuliah/tugas, dialog konfirmasi, dan ticker waktu WIB.
   import { loadState, saveState } from './lib/storage';
   import { addCourse, updateCourse, deleteCourse, countTasksOf, updateMeta, resetState } from './lib/actions';
   import { addTask, toggleTask, deleteTask, validateTaskForm } from './lib/tasks';
@@ -17,12 +20,13 @@
   import BackgroundDecor from './components/BackgroundDecor.svelte';
   import { onMount } from 'svelte';
 
+  // Muat state awal dari localStorage; jika kosong/berkas rusak, gunakan default.
   const loaded = loadState();
   let stateStore = $state(loaded.state);
   const storagePersistent = loaded.persistent;
   let lastSaveOk = $state(true);
 
-  // Dev-only: override current time via URL parameter ?now=2026-11-05T08:30:00+07:00
+  // Dev-only: override waktu saat ini via parameter URL ?now=... (tetap statis, tidak bertick)
   let overrideNow: Date | undefined = undefined;
   if (import.meta.env.DEV) {
     const params = new URLSearchParams(window.location.search);
@@ -35,23 +39,29 @@
     }
   }
 
+  // Simpan state ke localStorage dan catat apakah penyimpanan berhasil.
   function persist(nextState: AppState) {
     lastSaveOk = saveState(nextState);
   }
 
+  // State reaktif turunan dari stateStore.
   let appState = $derived(stateStore);
 
   let meta = $derived(appState.meta);
   let courses = $derived(appState.courses);
 
+  // Tampilan form tambah/edit mata kuliah.
   let showForm = $state(false);
   let editingId = $state<string | null>(null);
 
+  // Dialog konfirmasi hapus mata kuliah.
   let showDeleteDialog = $state(false);
   let deleteTarget = $state<{ id: string; name: string } | null>(null);
 
+  // Dialog konfirmasi reset ke jadwal default.
   let showResetDialog = $state(false);
 
+  // Dialog edit header (judul, program, semester).
   let showHeaderDialog = $state(false);
   let headerValues = $state({ title: '', program: '', semester: '' });
   let headerErrors = $state<Partial<Record<'title' | 'program' | 'semester', string>>>({});
@@ -60,22 +70,26 @@
   let resetDialog: HTMLDialogElement;
   let headerDialog: HTMLDialogElement;
 
+  // State form tambah tugas.
   let taskFormCourseId = $state<string | null>(null);
   let taskValues = $state({ title: '', due: '', dueTime: '' });
   let taskErrors = $state<Partial<Record<'title' | 'due' | 'dueTime', string>>>({});
   let taskFormTrigger = $state<HTMLButtonElement | null>(null);
 
+  // Dialog konfirmasi hapus tugas.
   let taskDeleteOpen = $state(false);
   let taskDeleteTarget = $state<{ id: string; title: string; courseId: string } | null>(null);
   let taskDeleteTrigger = $state<HTMLButtonElement | null>(null);
   let taskDeleteDialog: HTMLDialogElement;
 
+  // Data turunan: total SKS, pengelompokan per hari, hari ini, dan apakah hari ini kosong.
   let sksTotal = $derived(totalSks(courses));
   let groups = $derived(groupByDay(courses));
   let today = $derived(todayWib());
   let todayDay = $derived(getJakartaParts(new Date()).day);
   let todayEmpty = $derived(courses.length > 0 && !groups.some((g) => g.day === today));
 
+  // Sinkronisasi visibility dialog dengan status state.
   $effect(() => {
     if (showDeleteDialog) deleteDialog?.showModal();
     if (!showDeleteDialog) deleteDialog?.close();
@@ -93,11 +107,13 @@
     if (!taskDeleteOpen) taskDeleteDialog?.close();
   });
 
+  // Buka form tambah mata kuliah baru.
   function openAddForm() {
     editingId = null;
     showForm = true;
   }
 
+  // Buka form edit mata kuliah yang ada.
   function openEditForm(course: Course) {
     editingId = course.id;
     showForm = true;
@@ -108,6 +124,7 @@
     editingId = null;
   }
 
+  // Simpan mata kuliah (edit atau tambah baru), lalu persist dan tutup form.
   function onFormSave(values: Omit<Course, 'id'>) {
     if (editingId) {
       stateStore = updateCourse(appState, editingId, values);
@@ -118,11 +135,13 @@
     closeForm();
   }
 
+  // Buka dialog konfirmasi hapus mata kuliah.
   function onDelete(course: Course) {
     deleteTarget = { id: course.id, name: course.name };
     showDeleteDialog = true;
   }
 
+  // Hapus mata kuliah (dan tugas terkait) dari state, lalu persist.
   function confirmDelete() {
     if (!deleteTarget) return;
     stateStore = deleteCourse(appState, deleteTarget.id);
@@ -131,12 +150,14 @@
     deleteTarget = null;
   }
 
+  // Reset state ke jadwal default, lalu persist.
   function onReset() {
     stateStore = resetState();
     persist(appState);
     showResetDialog = false;
   }
 
+  // Isi form dialog header dengan nilai meta saat ini dan buka dialog.
   function openHeaderDialog() {
     headerValues = { title: meta.title, program: meta.program, semester: meta.semester };
     headerErrors = {};
@@ -147,6 +168,7 @@
     showHeaderDialog = false;
   }
 
+  // Validasi dan simpan perubahan header, lalu persist.
   function onHeaderSubmit() {
     const result = validateMetaForm(headerValues);
     if (result.ok) {
@@ -158,6 +180,7 @@
     }
   }
 
+  // Perbarui nilai input header dan hapus error pada field yang diubah.
   function onHeaderInputChange(field: 'title' | 'program' | 'semester', value: string) {
     headerValues = { ...headerValues, [field]: value };
     if (headerErrors[field]) {
@@ -167,6 +190,7 @@
     }
   }
 
+  // Buka form tambah tugas untuk mata kuliah tertentu.
   function openTaskForm(courseId: string, trigger: HTMLButtonElement) {
     taskFormCourseId = courseId;
     taskFormTrigger = trigger;
@@ -174,12 +198,14 @@
     taskErrors = {};
   }
 
+  // Tutup form tugas dan kembalikan fokus ke tombol pemicu.
   function closeTaskForm() {
     taskFormTrigger?.focus();
     taskFormTrigger = null;
     taskFormCourseId = null;
   }
 
+  // Perbarui nilai input form tugas dan hapus error pada field yang diubah.
   function onTaskInputChange(field: 'title' | 'due' | 'dueTime', value: string) {
     taskValues = { ...taskValues, [field]: value };
     if (field === 'due' && value === '') {
@@ -192,6 +218,7 @@
     }
   }
 
+  // Simpan tugas baru, lalu persist dan tutup form.
   function onTaskSave() {
     if (!taskFormCourseId) return;
     const result = validateTaskForm(taskValues);
@@ -204,12 +231,14 @@
     }
   }
 
+  // Buka dialog konfirmasi hapus tugas.
   function openTaskDelete(task: Task, trigger: HTMLButtonElement) {
     taskDeleteTarget = { id: task.id, title: task.title, courseId: task.courseId };
     taskDeleteTrigger = trigger;
     taskDeleteOpen = true;
   }
 
+  // Hapus tugas dari state, lalu persist.
   function confirmTaskDelete() {
     if (!taskDeleteTarget) return;
     stateStore = deleteTask(appState, taskDeleteTarget.id);
@@ -220,21 +249,24 @@
     taskDeleteTrigger = null;
   }
 
+  // Terapkan state hasil impor JSON dan persist.
   function onImportConfirmed(nextState: AppState) {
     stateStore = nextState;
     persist(appState);
   }
 
+  // Tambah tugas dari sidebar langsung ke state, lalu persist.
   function handleSidebarAddTask(courseId: string, value: { title: string; due?: string; dueTime?: string }) {
     stateStore = addTask(appState, courseId, value);
     persist(appState);
   }
 
-  // Single "now" source for the whole app (WIB). ?now= override stays static; otherwise ticks every 60s.
+  // Sumber waktu tunggal untuk seluruh aplikasi (WIB). Override ?now= tetap statis;
+  // selain itu bertick setiap 60 detik.
   let currentTime = $state(overrideNow ?? new Date());
 
   onMount(() => {
-    if (overrideNow) return; // don't tick when time is overridden
+    if (overrideNow) return; // jangan bertick saat waktu di-override
     const interval = window.setInterval(() => {
       currentTime = new Date();
     }, 60000);

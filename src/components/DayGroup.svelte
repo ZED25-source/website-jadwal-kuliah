@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Komponen tampilan mobile: mata kuliah dikelompokkan per hari dengan pill berwarna,
+  // badge "Hari ini", dan daftar CourseCard.
   import type { AppState, Course, Day } from '../lib/types';
   import CourseCard from './CourseCard.svelte';
   import { tasksOf, openTaskCount } from '../lib/tasks';
@@ -65,7 +67,7 @@
           <div class="day-group__col day-group__col--course"><span class="visually-hidden">Mata Kuliah</span>Mata Kuliah</div>
           <div class="day-group__col day-group__col--info"><span class="visually-hidden">Informasi</span>Info</div>
         </div>
-        {#each courses as course, idx}
+        {#each courses as course, idx (course.id)}
           <CourseCard
             {course}
             tasks={tasksOf(state, course.id)}

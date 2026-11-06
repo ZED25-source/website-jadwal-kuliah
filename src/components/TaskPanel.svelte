@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Komponen daftar tugas di sidebar: tugas terbuka (terlambat dulu, lalu menurut tenggat)
+  // dan tugas selesai dalam <details> yang dapat dicollapse.
   import type { Task, Course } from '../lib/types';
   import { formatDue, sortOpenTasks, partitionTasks, getJakartaDateKey, isOverdue } from '../lib/tasks';
   import { getJakartaParts } from '../lib/today';
@@ -36,7 +38,7 @@
 {:else}
   {#if sortedOpen.length > 0}
     <ul class="task-list">
-      {#each sortedOpen as task}
+      {#each sortedOpen as task (task.id)}
         {@const course = getCourse(task.courseId)}
         {@const overdue = isOverdue(task, todayKey, nowMinutes)}
         <li class="task-item" class:task-item--overdue={overdue}>
@@ -82,7 +84,7 @@
     <details class="task-done">
       <summary class="task-done__summary">Selesai ({sortedDone.length})</summary>
       <ul class="task-list">
-        {#each sortedDone as task}
+        {#each sortedDone as task (task.id)}
           {@const course = getCourse(task.courseId)}
           <li class="task-item task-item--done">
             <label class="task-item__label">
@@ -141,61 +143,62 @@
   .task-item {
     display: flex;
     align-items: flex-start;
-    gap: calc(var(--space-1) * 0.5);
-    padding: calc(var(--space-2) * 0.5);
+    gap: var(--space-2);
+    padding: var(--space-3);
     background: var(--bg-card);
-    border: var(--border-medium) solid var(--grid-gray);
+    border: var(--border-medium) solid var(--navy);
     border-radius: var(--radius-md);
   }
 
   .task-item--overdue {
     border-color: var(--red);
-    border-width: var(--border-medium);
   }
 
   .task-item--done {
     opacity: 0.7;
+    border-color: var(--grid-gray);
   }
 
   .task-item__label {
     display: flex;
-    align-items: center;
-    gap: calc(var(--space-1) * 0.5);
+    align-items: flex-start;
+    gap: var(--space-2);
     flex: 1;
     min-width: 0;
     cursor: pointer;
   }
 
   .task-item__checkbox {
+    margin-top: 2px;
     cursor: pointer;
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
   }
 
   .task-item__content {
     display: flex;
     flex-direction: column;
-    gap: calc(var(--space-1) * 0.5);
+    gap: var(--space-1);
     flex: 1;
     min-width: 0;
   }
 
   .task-item__meta {
     display: flex;
-    gap: calc(var(--space-1) * 0.5);
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .task-item__title {
-    font-size: calc(var(--font-size-caption) * 0.9);
-    font-weight: 600;
-    color: var(--navy);
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
     overflow-wrap: break-word;
     hyphens: auto;
-    border-left: var(--border-medium) solid var(--navy);
-    padding-left: var(--space-2);
+    line-height: 1.3;
+    letter-spacing: 0.02em;
   }
 
   .task-item--done .task-item__title {
@@ -203,13 +206,15 @@
   }
 
   .task-item__course {
-    font-size: calc(var(--font-size-caption) * 0.9);
+    font-size: 0.5625rem;
     color: var(--text-muted);
+    line-height: 1.4;
   }
 
   .task-item__due {
-    font-size: calc(var(--font-size-caption) * 0.9);
-    color: var(--text);
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 
   .task-item__due--overdue {
@@ -226,13 +231,13 @@
   .task-item__delete {
     background: transparent;
     border: none;
-    font-size: 1rem;
+    font-size: 1.25rem;
     line-height: 1;
     color: var(--text-muted);
     cursor: pointer;
     padding: 0;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;

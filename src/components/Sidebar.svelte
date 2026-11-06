@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Panel samping aplikasi: berisi tombol tambah mata kuliah, kalender, daftar tugas,
+  // form tambah tugas, catatan motivasi, dan alat impor/ekspor data.
   import type { AppState, Task } from '../lib/types';
   import { validateTaskForm } from '../lib/tasks';
   import { groupByDay } from '../lib/schedule';
@@ -129,7 +131,7 @@
               aria-describedby={taskFormErrors.courseId ? 'error-sidebar-task-course' : undefined}
             >
               <option value="">Pilih mata kuliah</option>
-              {#each coursesWithDay as course}
+              {#each coursesWithDay as course (course.id)}
                 <option value={course.id}>{course.name} ({course.dayLabel})</option>
               {/each}
             </select>
@@ -208,10 +210,10 @@
   .sidebar {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-4);
     min-width: 0;
     background: var(--bg-card);
-    padding: var(--space-4);
+    padding: var(--space-3);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-soft);
   }
@@ -219,7 +221,7 @@
   .sidebar__section {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .sidebar__heading {
@@ -316,7 +318,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--space-3);
     background: var(--off-white);
     border: var(--border-thin) solid var(--grid-gray);
     border-top: none;

@@ -1,30 +1,33 @@
 <script lang="ts">
-import type { Course, Task } from '../lib/types';
-import { formatTime } from '../lib/view';
-import TaskList from './TaskList.svelte';
+  // Komponen kartu detail mata kuliah: waktu, nama, meta (SKS/PJ/PD1/ruang), daftar tugas,
+  // form tambah tugas inline, dan aksi ubah/hapus/tambah tugas.
+  import type { Course, Task } from '../lib/types';
+  import { formatTime } from '../lib/view';
+  import TaskList from './TaskList.svelte';
 
-export let course: Course;
-export let tasks: Task[] = [];
-export let openCount: number = 0;
-export let onDelete: () => void = () => {};
-export let onEdit: () => void = () => {};
-export let onAddTask: (courseId: string, trigger: HTMLButtonElement) => void = () => {};
-export let onToggleTask: (taskId: string) => void = () => {};
-export let onDeleteTask: (taskId: string, trigger: HTMLButtonElement) => void = () => {};
-export let isAddingTask: boolean = false;
-export let taskValues: { title: string; due: string; dueTime?: string } = { title: '', due: '' };
-export let taskErrors: Partial<Record<'title' | 'due' | 'dueTime', string>> = {};
-export let onTaskInputChange: (field: 'title' | 'due' | 'dueTime', value: string) => void = () => {};
-export let onTaskSave: () => void = () => {};
-export let onTaskClose: () => void = () => {};
-export let isEven: boolean = false;
+  export let course: Course;
+  export let tasks: Task[] = [];
+  export let openCount: number = 0;
+  export let onDelete: () => void = () => {};
+  export let onEdit: () => void = () => {};
+  export let onAddTask: (courseId: string, trigger: HTMLButtonElement) => void = () => {};
+  export let onToggleTask: (taskId: string) => void = () => {};
+  export let onDeleteTask: (taskId: string, trigger: HTMLButtonElement) => void = () => {};
+  export let isAddingTask: boolean = false;
+  export let taskValues: { title: string; due: string; dueTime?: string } = { title: '', due: '' };
+  export let taskErrors: Partial<Record<'title' | 'due' | 'dueTime', string>> = {};
+  export let onTaskInputChange: (field: 'title' | 'due' | 'dueTime', value: string) => void = () => {};
+  export let onTaskSave: () => void = () => {};
+  export let onTaskClose: () => void = () => {};
+  export let isEven: boolean = false;
 
-let addTaskButton: HTMLButtonElement;
-let titleInput: HTMLInputElement | null = null;
+  let addTaskButton: HTMLButtonElement;
+  let titleInput: HTMLInputElement | null = null;
 
-$: if (isAddingTask && titleInput) {
-  titleInput.focus();
-}
+  // Fokuskan input judul saat form tambah tugas dibuka.
+  $: if (isAddingTask && titleInput) {
+    titleInput.focus();
+  }
 </script>
 
 <div class="course-box">

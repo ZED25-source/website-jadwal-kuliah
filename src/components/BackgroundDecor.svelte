@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Decorative background component
+  // Hiasan latar belakang dekoratif: bentuk latar, titik, gelombang, ikon monitor, dan garis putus.
 </script>
 
 <div class="bg-decor" aria-hidden="true">
