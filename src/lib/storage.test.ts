@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadState, saveState, validateState, STORAGE_KEY } from './storage';
 import { createDefaultState } from './defaults';
+import { SCHEMA_VERSION } from './types';
 
 beforeEach(() => {
   localStorage.clear();
@@ -12,6 +13,10 @@ describe('validateState', () => {
     expect(validateState('string')).toBeNull();
     expect(validateState(42)).toBeNull();
     expect(validateState(undefined)).toBeNull();
+  });
+
+  it('validateState tidak melempar untuk array', () => {
+    expect(validateState([1, 2, 3])).toBeNull();
   });
 
   it('mengembalikan null bila schemaVersion bukan angka', () => {
@@ -150,6 +155,60 @@ describe('loadState', () => {
     expect(result.persistent).toBe(false);
     expect(result.state.courses).toHaveLength(10);
     spy.mockRestore();
+  });
+
+  it('schemaVersion lebih baru → default di memori, data asli tidak ditimpa', () => {
+    const futureState = createDefaultState();
+    futureState.schemaVersion = 999;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(futureState));
+
+    const result = loadState();
+    expect(result.state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(result.state.courses).toHaveLength(10);
+    // data asli tidak ditimpa sebelum saveState
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(JSON.stringify(futureState));
+
+    // setelah saveState, data ditimpa
+    const newState = createDefaultState();
+    newState.meta.title = 'Baru';
+    saveState(newState);
+    const reloaded = loadState();
+    expect(reloaded.state.meta.title).toBe('Baru');
+  });
+
+  it('round-trip saveState lalu loadState mengembalikan data sama', () => {
+    const state = createDefaultState();
+    state.tasks.push({
+      id: 't1',
+      courseId: 'inf625107',
+      title: 'Tugas Contoh',
+      done: false,
+      createdAt: '2026-01-01T00:00:00Z',
+    });
+
+    expect(saveState(state)).toBe(true);
+    const loaded = loadState();
+    expect(loaded.state).toEqual(state);
+    expect(loaded.state.tasks).toHaveLength(1);
+    expect(loaded.state.tasks[0].title).toBe('Tugas Contoh');
+  });
+
+  it('data rusak ditimpa hanya setelah saveState', () => {
+    localStorage.setItem(STORAGE_KEY, '{ corrupt data');
+
+    // sebelum saveState, nilai lama tetap ada di localStorage
+    const before = loadState();
+    expect(before.state.courses).toHaveLength(10); // default di memori
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('{ corrupt data');
+
+    // setelah saveState, data ditimpa
+    const newState = createDefaultState();
+    newState.meta.title = 'Baru';
+    saveState(newState);
+
+    const after = loadState();
+    expect(after.state.meta.title).toBe('Baru');
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBe('{ corrupt data');
   });
 });
 

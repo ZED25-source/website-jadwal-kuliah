@@ -1,3 +1,8 @@
+// Polyfill localStorage: jsdom environment di Vitest v3.2.7 tidak menyediakan
+// implementasi localStorage bawaan, sehingga akses ke localStorage akan menghasilkan
+// TypeError (localStorage is undefined) tanpa mock ini.
+// Jika penyebabnya bisa diperbaiki lewat konfigurasi Vitest, usulkan saja, jangan diubah di sini.
+
 const store: Record<string, string> = {};
 
 const mockStorage: Storage = {
