@@ -11,12 +11,14 @@
 
 <style>
   .storage-notice {
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    padding: var(--space-4);
+    border: var(--border-medium) solid var(--orange);
+    border-radius: var(--radius-md);
+    background: rgba(242, 165, 38, 0.1);
     color: var(--text);
-    font-size: var(--font-size-caption);
-    margin-bottom: var(--space-3);
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-soft);
   }
 </style>

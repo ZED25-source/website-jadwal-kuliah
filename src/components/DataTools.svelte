@@ -96,12 +96,14 @@
 </script>
 
 <section class="data-tools">
-  <button type="button" class="data-tools__button data-tools__button--export" onclick={handleExport}>
-    Ekspor JSON
-  </button>
-  <button type="button" class="data-tools__button data-tools__button--import" onclick={(e) => openImport(e.currentTarget as HTMLButtonElement)}>
-    Impor JSON
-  </button>
+  <div class="data-tools__buttons">
+    <button type="button" class="data-tools__button" onclick={handleExport}>
+      Ekspor JSON
+    </button>
+    <button type="button" class="data-tools__button" onclick={(e) => openImport(e.currentTarget as HTMLButtonElement)}>
+      Impor JSON
+    </button>
+  </div>
   <input
     type="file"
     bind:this={fileInput}
@@ -116,7 +118,7 @@
     <p role="alert" class="data-tools__error">{importError}</p>
   {/if}
 
-  <dialog bind:this={importDialog}>
+  <dialog bind:this={importDialog} class="data-tools__dialog">
     {#if importPreview}
       <p class="data-tools__dialog__body">
         Yakin ingin mengimpor data ini?<br />
@@ -130,29 +132,34 @@
     {/if}
     <div class="data-tools__dialog__actions">
       <button type="button" class="button-cancel" onclick={cancelImport}>Batal</button>
-      <button type="button" class="button-delete" onclick={confirmImport}>Impor</button>
+      <button type="button" class="button-import" onclick={confirmImport}>Impor</button>
     </div>
   </dialog>
 </section>
 
 <style>
   .data-tools {
-    margin-top: var(--space-6);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--text-muted);
+    margin-top: var(--space-7);
+    padding-top: var(--space-6);
+    border-top: var(--border-thin) solid var(--grid-gray);
+  }
+
+  .data-tools__buttons {
     display: flex;
-    gap: var(--space-1);
+    gap: var(--space-4);
     flex-wrap: wrap;
   }
 
   .data-tools__button {
     font-size: var(--font-size-caption);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text);
+    color: var(--royal);
+    background: none;
+    border: none;
     cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    padding: 0;
+    font-weight: 600;
   }
 
   .data-tools__button:focus-visible {
@@ -161,25 +168,77 @@
   }
 
   .data-tools__button:hover {
-    background: var(--bg);
+    color: var(--navy);
   }
 
   .data-tools__error {
     font-size: var(--font-size-caption);
-    color: var(--accent);
-    margin: var(--space-1) 0 0 0;
+    color: var(--red);
+    margin: var(--space-3) 0 0 0;
+    font-weight: 600;
+  }
+
+  .data-tools__dialog {
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    padding: var(--space-6);
+    max-width: var(--form-max-width);
+    width: calc(100% - var(--space-4) * 2);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .data-tools__dialog::backdrop {
+    background: rgba(16, 52, 111, 0.5);
   }
 
   .data-tools__dialog__body {
-    margin: 0 0 var(--space-2) 0;
+    margin: 0 0 var(--space-5) 0;
     font-size: var(--font-size-body);
+    line-height: var(--line-height-loose);
     color: var(--text);
   }
 
   .data-tools__dialog__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-2);
+    gap: var(--space-3);
     margin: 0;
+  }
+
+  .button-cancel,
+  .button-import {
+    font-size: var(--font-size-body);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-weight: 600;
+    min-width: 100px;
+  }
+
+  .button-cancel {
+    background: transparent;
+    color: var(--text);
+    border: var(--border-thin) solid var(--grid-gray);
+  }
+
+  .button-cancel:hover {
+    background: var(--grid-gray);
+  }
+
+  .button-import {
+    background: var(--navy);
+    color: var(--text-on-navy);
+    border: none;
+  }
+
+  .button-import:hover {
+    background: var(--royal);
+  }
+
+  .button-cancel:focus-visible,
+  .button-import:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 </style>

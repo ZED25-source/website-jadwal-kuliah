@@ -1,29 +1,49 @@
-/* Design Tokens dari docs/DESIGN.md */
+/* Design Tokens: Modern Academic Infographic Poster */
 
 :root {
-  /* Color tokens */
-  --bg: #FAF7F2;
-  --text: #2B2620;
-  --text-muted: #6B6155;
-  --accent: #9A6232;
-  --accent-hover: #7E4E24;
+  /* Color palette tokens */
+  --navy: #10346F;
+  --royal: #14579A;
+  --light-blue: #DCECF7;
+  --off-white: #F8FAFC;
+  --teal: #20A6A5;
+  --green: #55A64E;
+  --orange: #F2A526;
+  --purple: #7961B2;
+  --yellow: #FFC928;
+  --red: #DC2626;
+  --grid-gray: #E2E8F0;
+
+  /* Semantic color tokens */
+  --bg: var(--off-white);
+  --bg-card: #FFFFFF;
+  --text: #1E293B;
+  --text-on-navy: #FFFFFF;
+  --text-muted: #64748B;
+  --accent: var(--navy);
 
   /* Spacing scale */
   --space-1: 4px;
   --space-2: 8px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 48px;
-  --space-6: 96px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
 
   /* Typography */
+  --font-display: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', sans-serif-condensed, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-handwritten: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive;
+
   --font-size-caption: 0.875rem;  /* 14px */
   --font-size-body: 1rem;         /* 16px */
   --font-size-lead: 1.25rem;      /* 20px */
   --font-size-h3: 1.5rem;         /* 24px */
   --font-size-h2: 2rem;           /* 32px */
   --font-size-h1: 2.5rem;         /* 40px */
+  --font-size-display: 3rem;      /* 48px */
   
   --line-height-tight: 1.15;
   --line-height-snug: 1.2;
@@ -32,23 +52,32 @@
   --line-height-loose: 1.6;
 
   --max-line-length: 65ch;
-}
+  
+  /* Component-specific tokens */
+  --border-thin: 1px;
+  --border-medium: 2px;
+  --border-thick: 3px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+  --form-max-width: 540px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1C1915;
-    --text: #EDE7DD;
-    --text-muted: #A39889;
-    --accent: #D4A06A;
-    --accent-hover: #E2B584;
-  }
+  /* Shadow tokens */
+  --shadow-soft: 0 2px 8px rgba(16, 52, 111, 0.08);
+  --shadow-medium: 0 4px 16px rgba(16, 52, 111, 0.12);
+
+  /* Grid columns untuk jadwal (didefinisikan satu kali, dipakai header baris dan baris isi) */
+  --grid-cols: 140px minmax(12ch, 1fr) 220px;
 }
 
 /* Typography scale untuk layar kecil */
 @media (max-width: 640px) {
   :root {
-    --font-size-h1: 2rem;      /* 32px */
-    --font-size-h2: 1.5rem;    /* 24px */
+    --font-size-display: 2rem;   /* 32px */
+    --font-size-h1: 2rem;        /* 32px */
+    --font-size-h2: 1.5rem;      /* 24px */
   }
 }
 
@@ -67,19 +96,21 @@ body {
   line-height: var(--line-height-loose);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* Typography */
 h1 {
   font-size: var(--font-size-h1);
   line-height: var(--line-height-tight);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 h2 {
   font-size: var(--font-size-h2);
   line-height: var(--line-height-snug);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 h3 {
@@ -100,7 +131,7 @@ a {
 }
 
 a:hover {
-  color: var(--accent-hover);
+  color: var(--royal);
 }
 
 /* Focus states */

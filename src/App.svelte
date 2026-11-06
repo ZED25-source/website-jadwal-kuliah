@@ -12,6 +12,7 @@
   import CourseForm from './components/CourseForm.svelte';
   import StorageNotice from './components/StorageNotice.svelte';
   import DataTools from './components/DataTools.svelte';
+  import BackgroundDecor from './components/BackgroundDecor.svelte';
 
   const loaded = loadState();
   let state = loaded.state;
@@ -46,9 +47,9 @@
   let taskErrors: Partial<Record<'title' | 'due', string>> = {};
   let taskFormTrigger: HTMLButtonElement | null = null;
 
-let taskDeleteOpen = false;
-let taskDeleteTarget: { id: string; title: string; courseId: string } | null = null;
-let taskDeleteTrigger: HTMLButtonElement | null = null;
+  let taskDeleteOpen = false;
+  let taskDeleteTarget: { id: string; title: string; courseId: string } | null = null;
+  let taskDeleteTrigger: HTMLButtonElement | null = null;
   let taskDeleteDialog: HTMLDialogElement;
 
   $: sksTotal = totalSks(courses);
@@ -194,7 +195,9 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   }
 </script>
 
-<main>
+<BackgroundDecor />
+
+<main class="main">
   <StorageNotice persistent={storagePersistent} {lastSaveOk} />
 
   <Header {meta} totalSks={sksTotal} onEditHeader={openHeaderDialog} />
@@ -248,7 +251,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
 
   <DataTools {state} onImportConfirmed={onImportConfirmed} />
 
-  <dialog bind:this={deleteDialog}>
+  <dialog bind:this={deleteDialog} class="dialog">
     {#if deleteTarget}
       <p class="dialog__body">
         Hapus "{deleteTarget.name}"?
@@ -264,7 +267,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     </div>
   </dialog>
 
-  <dialog bind:this={resetDialog}>
+  <dialog bind:this={resetDialog} class="dialog">
     <p class="dialog__body">Reset ke jadwal default? Semua perubahan dan tugas akan hilang.</p>
     <div class="dialog__actions">
       <button type="button" class="button-cancel" onclick={() => { showResetDialog = false; }}>Batal</button>
@@ -272,7 +275,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     </div>
   </dialog>
 
-  <dialog bind:this={headerDialog}>
+  <dialog bind:this={headerDialog} class="dialog">
     <h2 class="dialog__title">Ubah Header</h2>
     <form class="dialog__form" onsubmit={(e) => { e.preventDefault(); onHeaderSubmit(); }}>
       <div class="form-field">
@@ -316,7 +319,7 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
     </form>
   </dialog>
 
-  <dialog bind:this={taskDeleteDialog}>
+  <dialog bind:this={taskDeleteDialog} class="dialog">
     {#if taskDeleteTarget}
       <p class="dialog__body">Hapus tugas "{taskDeleteTarget.title}"?</p>
     {/if}
@@ -328,16 +331,31 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
 </main>
 
 <style>
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-5);
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (min-width: 768px) {
+    .main {
+      padding: var(--space-8) var(--space-7);
+    }
+  }
+
   .button-add {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-3);
-    background: var(--accent);
-    color: var(--bg);
+    padding: var(--space-3) var(--space-6);
+    background: var(--navy);
+    color: var(--text-on-navy);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-pill);
     cursor: pointer;
-    font-weight: 600;
-    margin-bottom: var(--space-3);
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-soft);
   }
 
   .button-add:focus-visible {
@@ -346,33 +364,73 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   }
 
   .button-add:hover {
-    background: var(--accent-hover);
+    background: var(--royal);
+    box-shadow: var(--shadow-medium);
   }
 
   .empty {
     color: var(--text-muted);
     font-size: var(--font-size-body);
-    margin-top: var(--space-3);
+    margin: var(--space-5) 0;
+    padding: var(--space-5);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: var(--border-thin) solid var(--grid-gray);
+    text-align: center;
   }
 
-  .button-cancel:focus-visible,
-  .button-delete:focus-visible,
-  .button-primary:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  .dialog {
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text);
+    padding: var(--space-6);
+    max-width: var(--form-max-width);
+    width: calc(100% - var(--space-4) * 2);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .dialog::backdrop {
+    background: rgba(16, 52, 111, 0.5);
+  }
+
+  .dialog__title {
+    font-size: var(--font-size-h2);
+    font-weight: 700;
+    margin: 0 0 var(--space-5) 0;
+    color: var(--navy);
+  }
+
+  .dialog__body {
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-loose);
+    margin: 0 0 var(--space-5) 0;
+  }
+
+  .dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .dialog__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
   }
 
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    margin: 0 0 var(--space-2) 0;
+    gap: var(--space-2);
+    margin: 0;
   }
 
   .form-field__label {
     font-size: var(--font-size-body);
     color: var(--text);
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
   }
 
@@ -383,10 +441,10 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
 
   .form-field input {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    padding: var(--space-3);
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
     color: var(--text);
     width: 100%;
     box-sizing: border-box;
@@ -398,12 +456,62 @@ let taskDeleteTrigger: HTMLButtonElement | null = null;
   }
 
   .form-field input[aria-invalid="true"] {
-    border-color: var(--accent);
+    border-color: var(--red);
   }
 
   .form-field__error {
     font-size: var(--font-size-caption);
-    color: var(--accent);
+    color: var(--red);
     margin: 0;
+    font-weight: 600;
+  }
+
+  .button-cancel,
+  .button-delete,
+  .button-primary {
+    font-size: var(--font-size-body);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-weight: 600;
+    min-width: 100px;
+  }
+
+  .button-cancel {
+    background: transparent;
+    color: var(--text);
+    border: var(--border-thin) solid var(--grid-gray);
+  }
+
+  .button-cancel:hover {
+    background: var(--grid-gray);
+  }
+
+  .button-delete {
+    background: transparent;
+    color: var(--text);
+    border: var(--border-thin) solid var(--grid-gray);
+  }
+
+  .button-delete:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .button-primary {
+    background: var(--navy);
+    color: var(--text-on-navy);
+    border: none;
+  }
+
+  .button-primary:hover {
+    background: var(--royal);
+  }
+
+  .button-cancel:focus-visible,
+  .button-delete:focus-visible,
+  .button-primary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 </style>

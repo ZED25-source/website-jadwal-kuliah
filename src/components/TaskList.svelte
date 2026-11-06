@@ -9,7 +9,7 @@
 
 <ul class="task-list">
   {#each tasks as task}
-    <li class="task-list__item">
+    <li class="task-list__item" class:task-list__item--done={task.done}>
       <label class="task-list__label">
         <input
           type="checkbox"
@@ -19,7 +19,7 @@
         />
         <span class="task-list__title">{task.title}</span>
         {#if task.done}
-          <span class="task-list__done">Selesai</span>
+          <span class="task-list__done-text">Selesai</span>
         {/if}
       </label>
       {#if task.due}
@@ -44,34 +44,41 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
 
   .task-list__item {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    flex-wrap: wrap;
+  }
+
+  .task-list__item--done {
+    background: rgba(85, 166, 78, 0.05);
   }
 
   .task-list__label {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-3);
     flex: 1;
     margin: 0;
     cursor: pointer;
     font-size: var(--font-size-body);
     color: var(--text);
+    min-width: 0;
   }
 
   .task-list__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
+    cursor: pointer;
   }
 
   .task-list__checkbox:focus-visible {
@@ -81,28 +88,43 @@
 
   .task-list__title {
     flex: 1;
+    text-decoration: none;
+    word-break: break-word;
   }
 
-  .task-list__done {
-    font-size: var(--font-size-caption);
+  .task-list__item--done .task-list__title {
+    text-decoration: line-through;
     color: var(--text-muted);
+  }
+
+  .task-list__done-text {
+    font-size: var(--font-size-caption);
+    color: var(--green);
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   .task-list__due {
     font-size: var(--font-size-caption);
-    color: var(--text-muted);
+    color: var(--text);
+    background: var(--orange);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
     white-space: nowrap;
+    font-weight: 600;
   }
 
   .task-list__delete {
     font-size: var(--font-size-caption);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text);
+    color: var(--text-muted);
+    background: none;
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
     cursor: pointer;
     flex-shrink: 0;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   .task-list__delete:focus-visible {
@@ -111,6 +133,23 @@
   }
 
   .task-list__delete:hover {
-    background: var(--bg);
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  @media (max-width: 480px) {
+    .task-list__item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .task-list__label {
+      width: 100%;
+    }
+
+    .task-list__due,
+    .task-list__delete {
+      align-self: flex-end;
+    }
   }
 </style>

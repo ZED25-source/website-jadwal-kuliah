@@ -67,7 +67,7 @@
 </script>
 
 {#if open}
-    <dialog class="form-dialog" open={open}>
+  <dialog class="form-dialog" open={open}>
     <h2 class="form-dialog__title">{course ? 'Ubah Mata Kuliah' : 'Tambah Mata Kuliah'}</h2>
     <form class="form-dialog__form" onsubmit={(e) => { e.preventDefault(); onSubmit(); }}>
       <div class="form-field">
@@ -215,39 +215,45 @@
 
 <style>
   .form-dialog {
-    padding: var(--space-4);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    max-width: 65ch;
-    width: 100%;
+    padding: var(--space-6);
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    max-width: var(--form-max-width);
+    width: calc(100% - var(--space-4) * 2);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .form-dialog::backdrop {
+    background: rgba(16, 52, 111, 0.5);
   }
 
   .form-dialog__title {
     font-size: var(--font-size-h2);
     line-height: var(--line-height-snug);
-    font-weight: 600;
-    margin: 0 0 var(--space-3) 0;
-    color: var(--text);
+    font-weight: 700;
+    margin: 0 0 var(--space-5) 0;
+    color: var(--navy);
   }
 
   .form-dialog__form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-4);
     margin: 0;
   }
 
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
     margin: 0;
   }
 
   .form-field__label {
     font-size: var(--font-size-body);
     color: var(--text);
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
   }
 
@@ -259,10 +265,10 @@
   .form-field input,
   .form-field select {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    padding: var(--space-3);
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
     color: var(--text);
     width: 100%;
     box-sizing: border-box;
@@ -276,39 +282,41 @@
 
   .form-field input[aria-invalid="true"],
   .form-field select[aria-invalid="true"] {
-    border-color: var(--accent);
+    border-color: var(--red);
   }
 
   .form-field__error {
     font-size: var(--font-size-caption);
-    color: var(--accent);
+    color: var(--red);
     margin: 0;
+    font-weight: 600;
   }
 
   .form-dialog__conflict {
-    font-size: var(--font-size-caption);
-    color: var(--text-muted);
+    font-size: var(--font-size-body);
+    color: var(--text);
+    background: rgba(242, 165, 38, 0.15);
     margin: 0;
-    padding: var(--space-2);
-    border: 1px dashed var(--text-muted);
-    border-radius: 4px;
+    padding: var(--space-3);
+    border: var(--border-medium) dashed var(--orange);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
   }
 
   .form-dialog__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-2);
-    margin-top: var(--space-2);
+    gap: var(--space-3);
+    margin-top: var(--space-3);
   }
 
   .button {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-3);
-    border: none;
-    border-radius: 4px;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     font-weight: 600;
-    min-width: 80px;
+    min-width: 100px;
   }
 
   .button:focus-visible {
@@ -317,21 +325,22 @@
   }
 
   .button--primary {
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--navy);
+    color: var(--text-on-navy);
+    border: none;
   }
 
   .button--primary:hover {
-    background: var(--accent-hover);
+    background: var(--royal);
   }
 
   .button--secondary {
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--text-muted);
+    border: var(--border-thin) solid var(--grid-gray);
   }
 
   .button--secondary:hover {
-    background: var(--bg);
+    background: var(--grid-gray);
   }
 </style>

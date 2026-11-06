@@ -17,6 +17,7 @@ export let taskErrors: Partial<Record<'title' | 'due', string>> = {};
 export let onTaskInputChange: (field: 'title' | 'due', value: string) => void = () => {};
 export let onTaskSave: () => void = () => {};
 export let onTaskClose: () => void = () => {};
+export let isEven: boolean = false;
 
 let addTaskButton: HTMLButtonElement;
 let titleInput: HTMLInputElement | null = null;
@@ -26,137 +27,216 @@ $: if (isAddingTask && titleInput) {
 }
 </script>
 
-<li class="course">
-  <time class="course__time">
-    {formatTime(course.start)} – {formatTime(course.end)}
-  </time>
-  <h3 class="course__name">
-    {#if course.code}{course.code} {/if}{course.name}
-  </h3>
-  <p class="course__meta">
-    {#if course.sks !== undefined}
-      <span class="course__meta-item">{course.sks} SKS</span>
-    {/if}
-    {#if course.pj}
-      <span class="course__meta-item">PJ {course.pj}</span>
-    {/if}
-    {#if course.pd1}
-      <span class="course__meta-item">PD 1 {course.pd1}</span>
-    {/if}
-    {#if course.room}
-      <span class="course__meta-item">{course.room}</span>
-    {/if}
-  </p>
-  <div class="course__actions">
-    <button type="button" class="course__button course__button--edit" onclick={onEdit}>Ubah {course.name}</button>
-    <button type="button" class="course__button course__button--delete" onclick={onDelete}>Hapus {course.name}</button>
-    <button
-      type="button"
-      class="course__button course__button--add-task"
-      bind:this={addTaskButton}
-      onclick={() => onAddTask(course.id, addTaskButton)}
-    >
-      Tambah tugas {course.name}
-    </button>
+<div class="course" class:course--even={isEven}>
+  <div class="course__time-col">
+    <time class="course__time" aria-label="{formatTime(course.start)} sampai {formatTime(course.end)}">
+      {formatTime(course.start)}<br />– {formatTime(course.end)}
+    </time>
   </div>
 
-  {#if tasks.length > 0}
-    <p class="course__task-count">{openCount} tugas belum selesai</p>
-    <TaskList
-      {tasks}
-      onToggle={onToggleTask}
-      onDelete={onDeleteTask}
-    />
-  {/if}
+  <div class="course__content-col">
+    <h3 class="course__name">
+      {#if course.code}<span class="course__code">{course.code}</span>{/if}
+      {course.name}
+    </h3>
 
-  {#if isAddingTask}
-    <form class="task-form" onsubmit={(e) => { e.preventDefault(); onTaskSave(); }}>
-      <div class="form-field">
-        <label class="form-field__label" for="task-title">
-          Judul <span class="form-field__required">(wajib)</span>
-        </label>
-        <input
-          id="task-title"
-          type="text"
-          bind:this={titleInput}
-          bind:value={taskValues.title}
-          oninput={(e) => onTaskInputChange('title', (e.target as HTMLInputElement).value)}
-          aria-invalid={!!taskErrors.title}
-          aria-describedby={taskErrors.title ? 'error-task-title' : undefined}
-        />
-        {#if taskErrors.title}
-          <p id="error-task-title" class="form-field__error">{taskErrors.title}</p>
+    {#if course.sks !== undefined || course.pj || course.pd1 || course.room}
+      <div class="course__meta">
+        {#if course.sks !== undefined}
+          <span class="course__meta-item"><strong>SKS:</strong> {course.sks}</span>
+        {/if}
+        {#if course.pj}
+          <span class="course__meta-item"><strong>PJ:</strong> {course.pj}</span>
+        {/if}
+        {#if course.pd1}
+          <span class="course__meta-item"><strong>PD 1:</strong> {course.pd1}</span>
+        {/if}
+        {#if course.room}
+          <span class="course__meta-item"><strong>Ruang:</strong> {course.room}</span>
         {/if}
       </div>
-      <div class="form-field">
-        <label class="form-field__label" for="task-due">Tenggat</label>
-        <input
-          id="task-due"
-          type="date"
-          bind:value={taskValues.due}
-          oninput={(e) => onTaskInputChange('due', (e.target as HTMLInputElement).value)}
-          aria-invalid={!!taskErrors.due}
-          aria-describedby={taskErrors.due ? 'error-task-due' : undefined}
-        />
-        {#if taskErrors.due}
-          <p id="error-task-due" class="form-field__error">{taskErrors.due}</p>
-        {/if}
-      </div>
-      <div class="task-form__actions">
-        <button type="button" class="button button--secondary" onclick={onTaskClose}>Batal</button>
-        <button type="submit" class="button button--primary">Simpan</button>
-      </div>
-    </form>
-  {/if}
-</li>
+    {/if}
+
+    {#if tasks.length > 0}
+      {#if openCount > 0}
+        <div class="course__task-badge">{openCount} tugas belum selesai</div>
+      {/if}
+      <TaskList
+        {tasks}
+        onToggle={onToggleTask}
+        onDelete={onDeleteTask}
+      />
+    {/if}
+
+    {#if isAddingTask}
+      <form class="task-form" onsubmit={(e) => { e.preventDefault(); onTaskSave(); }}>
+        <div class="form-field">
+          <label class="form-field__label" for="task-title-{course.id}">
+            Judul <span class="form-field__required">(wajib)</span>
+          </label>
+          <input
+            id="task-title-{course.id}"
+            type="text"
+            bind:this={titleInput}
+            bind:value={taskValues.title}
+            oninput={(e) => onTaskInputChange('title', (e.target as HTMLInputElement).value)}
+            aria-invalid={!!taskErrors.title}
+            aria-describedby={taskErrors.title ? `error-task-title-${course.id}` : undefined}
+          />
+          {#if taskErrors.title}
+            <p id="error-task-title-{course.id}" class="form-field__error">{taskErrors.title}</p>
+          {/if}
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="task-due-{course.id}">Tenggat</label>
+          <input
+            id="task-due-{course.id}"
+            type="date"
+            bind:value={taskValues.due}
+            oninput={(e) => onTaskInputChange('due', (e.target as HTMLInputElement).value)}
+            aria-invalid={!!taskErrors.due}
+            aria-describedby={taskErrors.due ? `error-task-due-${course.id}` : undefined}
+          />
+          {#if taskErrors.due}
+            <p id="error-task-due-{course.id}" class="form-field__error">{taskErrors.due}</p>
+          {/if}
+        </div>
+        <div class="task-form__actions">
+          <button type="button" class="button button--secondary" onclick={onTaskClose}>Batal</button>
+          <button type="submit" class="button button--primary">Simpan</button>
+        </div>
+      </form>
+    {/if}
+  </div>
+
+  <div class="course__actions-col">
+    <div class="course__actions">
+      <button type="button" class="course__button course__button--edit" onclick={onEdit} aria-label="Ubah {course.name}">Ubah</button>
+      <button type="button" class="course__button course__button--delete" onclick={onDelete} aria-label="Hapus {course.name}">Hapus</button>
+      <button
+        type="button"
+        class="course__button course__button--add-task"
+        bind:this={addTaskButton}
+        onclick={() => onAddTask(course.id, addTaskButton)}
+        aria-label="Tambah tugas {course.name}"
+      >
+        + Tugas
+      </button>
+    </div>
+  </div>
+</div>
 
 <style>
   .course {
-    margin-bottom: var(--space-2);
+    display: grid;
+    grid-template-columns: 7rem minmax(12ch, 1fr) 9rem;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-bottom: var(--border-thin) solid var(--grid-gray);
+    container-type: inline-size;
+  }
+
+  .course:last-child {
+    border-bottom: none;
+  }
+
+  .course--even {
+    background: rgba(220, 236, 247, 0.15);
+  }
+
+  @media (min-width: 768px) {
+    .course {
+      gap: var(--space-5);
+    }
+  }
+
+  @container (max-width: 560px) {
+    .course {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+    .course__actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  .course__time-col {
+    display: flex;
+    flex-direction: column;
   }
 
   .course__time {
-    font-size: var(--font-size-caption);
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: var(--space-1);
+    font-size: var(--font-size-lead);
+    font-weight: 700;
+    color: var(--royal);
+    line-height: var(--line-height-snug);
+  }
+
+  .course__content-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .course__name {
     font-size: var(--font-size-h3);
-    line-height: var(--line-height-snug);
-    font-weight: 600;
-    margin: 0 0 var(--space-1) 0;
-    color: var(--text);
+    line-height: var(--line-height-relaxed);
+    font-weight: 700;
+    margin: 0;
+    color: var(--navy);
+  }
+
+  .course__code {
+    display: inline-block;
+    margin-right: var(--space-2);
+    color: var(--royal);
+    font-weight: 700;
   }
 
   .course__meta {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: var(--space-1);
     font-size: var(--font-size-caption);
     color: var(--text-muted);
-    margin: 0 0 var(--space-1) 0;
   }
 
   .course__meta-item {
+    display: block;
+  }
+
+  .course__task-badge {
     display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    background: var(--yellow);
+    color: var(--navy);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    align-self: flex-start;
+  }
+
+  .course__actions-col {
+    display: flex;
+    flex-direction: column;
   }
 
   .course__actions {
     display: flex;
-    gap: var(--space-1);
-    margin: 0 0 var(--space-2) 0;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .course__button {
     font-size: var(--font-size-caption);
-    padding: var(--space-1) var(--space-2);
-    border: none;
-    border-radius: 4px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   .course__button:focus-visible {
@@ -166,48 +246,45 @@ $: if (isAddingTask && titleInput) {
 
   .course__button--edit {
     background: transparent;
-    color: var(--text);
-    border: 1px solid var(--text-muted);
+    color: var(--royal);
+    border: var(--border-thin) solid var(--royal);
   }
 
   .course__button--edit:hover {
-    background: var(--bg);
+    background: var(--royal);
+    color: var(--text-on-navy);
   }
 
   .course__button--delete {
     background: transparent;
-    color: var(--text);
-    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    border: var(--border-thin) solid var(--grid-gray);
   }
 
   .course__button--delete:hover {
-    background: var(--bg);
+    border-color: var(--red);
+    color: var(--red);
   }
 
   .course__button--add-task {
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--navy);
+    color: var(--text-on-navy);
+    border: none;
   }
 
   .course__button--add-task:hover {
-    background: var(--accent-hover);
-  }
-
-  .course__task-count {
-    font-size: var(--font-size-caption);
-    color: var(--text-muted);
-    margin: 0 0 var(--space-1) 0;
+    background: var(--royal);
   }
 
   .task-form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin: 0 0 var(--space-2) 0;
-    padding: var(--space-3);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    gap: var(--space-3);
+    margin: var(--space-3) 0 0 0;
+    padding: var(--space-4);
+    border: var(--border-medium) dashed var(--grid-gray);
+    border-radius: var(--radius-md);
+    background: var(--off-white);
   }
 
   .task-form__actions {
@@ -220,14 +297,14 @@ $: if (isAddingTask && titleInput) {
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
     margin: 0;
   }
 
   .form-field__label {
     font-size: var(--font-size-body);
     color: var(--text);
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
   }
 
@@ -238,10 +315,10 @@ $: if (isAddingTask && titleInput) {
 
   .form-field input {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--text-muted);
-    border-radius: 4px;
-    background: var(--bg);
+    padding: var(--space-3);
+    border: var(--border-thin) solid var(--grid-gray);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
     color: var(--text);
     width: 100%;
     box-sizing: border-box;
@@ -253,23 +330,23 @@ $: if (isAddingTask && titleInput) {
   }
 
   .form-field input[aria-invalid="true"] {
-    border-color: var(--accent);
+    border-color: var(--red);
   }
 
   .form-field__error {
     font-size: var(--font-size-caption);
-    color: var(--accent);
+    color: var(--red);
     margin: 0;
+    font-weight: 600;
   }
 
   .button {
     font-size: var(--font-size-body);
-    padding: var(--space-1) var(--space-3);
-    border: none;
-    border-radius: 4px;
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     font-weight: 600;
-    min-width: 80px;
+    min-width: 100px;
   }
 
   .button:focus-visible {
@@ -278,21 +355,22 @@ $: if (isAddingTask && titleInput) {
   }
 
   .button--primary {
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--navy);
+    color: var(--text-on-navy);
+    border: none;
   }
 
   .button--primary:hover {
-    background: var(--accent-hover);
+    background: var(--royal);
   }
 
   .button--secondary {
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--text-muted);
+    border: var(--border-thin) solid var(--grid-gray);
   }
 
   .button--secondary:hover {
-    background: var(--bg);
+    background: var(--grid-gray);
   }
 </style>

@@ -1,155 +1,206 @@
 # DESIGN.md
 
+## Theme
+Modern Academic Infographic Poster: Bold, structured, colorful, and educational.
+
 ## Principles
-Calm, quiet, readable. Content leads; the interface stays out of the way.
-When a rule below conflicts with readability or accessibility, readability wins.
+Clarity, hierarchy, and visual engagement. Content is organized like an academic poster: prominent headings, color-coded sections, and clear visual groupings. Information is easy to scan and accessible.
 
 ## Color
 
-### Tokens
-Define as CSS custom properties. Never hardcode hex values in components.
+### Palette Tokens
+Define as CSS custom properties. Never hardcode hex values in components except within SVG decorative elements using currentColor or var().
 
-| Token             | Light       | Dark        | Use                              |
-|-------------------|-------------|-------------|----------------------------------|
-| `--bg`            | `#FAF7F2`   | `#1C1915`   | Page background                  |
-| `--text`          | `#2B2620`   | `#EDE7DD`   | Body and headings                |
-| `--text-muted`    | `#6B6155`   | `#A39889`   | Captions, metadata, secondary    |
-| `--accent`        | `#9A6232`   | `#D4A06A`   | Links, focus rings, small marks  |
-| `--accent-hover`  | `#7E4E24`   | `#E2B584`   | Hover/active state of accent     |
+| Token             | Value       | Use                                          |
+|-------------------|-------------|----------------------------------------------|
+| `--navy`          | `#10346F`   | Primary brand, headings, key actions         |
+| `--royal`         | `#14579A`   | Secondary brand, hover states, accents       |
+| `--light-blue`    | `#DCECF7`   | Backgrounds, decorative fills                |
+| `--off-white`     | `#F8FAFC`   | Page background                              |
+| `--teal`          | `#20A6A5`   | Day pill (Tuesday)                           |
+| `--green`         | `#55A64E`   | Day pill (Wednesday), success states         |
+| `--orange`        | `#F2A526`   | Day pill (Thursday), due dates               |
+| `--purple`        | `#7961B2`   | Day pill (Friday), icons                     |
+| `--yellow`        | `#FFC928`   | Sticky notes, badges, highlights             |
+| `--red`           | `#DC2626`   | Pushpin, delete hover, errors                |
+| `--grid-gray`     | `#E2E8F0`   | Borders, dividers, subtle lines              |
+| `--bg`            | `#F8FAFC`   | Page background (off-white)                  |
+| `--bg-card`       | `#FFFFFF`   | Card surfaces                                |
+| `--text`          | `#1E293B`   | Body text                                    |
+| `--text-on-navy`  | `#FFFFFF`   | Text on navy/royal/purple backgrounds        |
+| `--text-muted`    | `#64748B`   | Secondary text, metadata                     |
+| `--accent`        | `var(--navy)` | Focus rings, links                         |
+
+### Day Colors
+- Senin (Monday): navy
+- Selasa (Tuesday): teal
+- Rabu (Wednesday): green
+- Kamis (Thursday): orange
+- Jumat (Friday): purple
+- Sabtu/Minggu (Saturday/Sunday): royal
+
+Text on pills: white on navy, royal, purple; navy on teal, green, orange, yellow.
 
 ### Rules
-- No pure `#000` or `#FFF`. No gradients.
-- Accent is sparing: links, focus states, one highlight per screen at most.
-- Contrast minimums (WCAG AA): 4.5:1 for body text, 3:1 for large text and UI
-  boundaries. Check `--text-muted` and `--accent` against `--bg` in both themes.
-- Respect `prefers-color-scheme`. Dark mode is warm, not blue-grey.
-- Never rely on color alone to convey state; links are also underlined.
+- Contrast minimums (WCAG AA): 4.5:1 for body text, 3:1 for large text/icons.
+- Light mode only (dark mode removed for this theme).
+- Never rely on color alone to convey state: use text labels, icons, and borders.
 
 ## Typography
 
-- Family: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`
-  (optionally pair with one serif for headings: `Georgia, "Times New Roman", serif`)
-- Never more than two families, and if two, one serif and one sans.
+### Families
+- **Display**: `'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', sans-serif-condensed, sans-serif` — for bold, condensed, uppercase headings
+- **Body**: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`
+- **Handwritten**: `'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive` — for sticky notes only
+
+### Scale
 
 | Role    | Size  | Line-height | Weight |
 |---------|-------|-------------|--------|
-| Caption | 14px  | 1.5         | 400    |
-| Body    | 16px  | 1.6         | 400    |
-| Lead    | 20px  | 1.5         | 400    |
-| H3      | 24px  | 1.3         | 600    |
-| H2      | 32px  | 1.2         | 600    |
-| H1      | 40px  | 1.15        | 600    |
+| Caption | 14px  | 1.5         | 400–700|
+| Body    | 16px  | 1.6         | 400–700|
+| Lead    | 20px  | 1.5         | 600–700|
+| H3      | 24px  | 1.3         | 600–700|
+| H2      | 32px  | 1.2         | 700    |
+| H1      | 40px  | 1.15        | 700–800|
+| Display | 48px  | 1.15        | 800    |
 
+- Display headings: uppercase, bold, condensed.
 - Body text never goes below 16px.
-- Max line length: 65ch for prose.
-- Use rem units in code (14/16/20/24/32/40px → 0.875/1/1.25/1.5/2/2.5rem) so user font settings are respected.
-- Left-align text. No justified text, no all-caps paragraphs.
-- Scale headings down one step on screens under 640px (H1 → 32px, H2 → 24px).
+- Use rem units in code so user font settings are respected.
+- Scale headings down one step on screens under 640px.
 
 ## Spacing
-One scale: 4 / 8 / 16 / 24 / 48 / 96 px. Define as tokens (`--space-1` … `--space-6`).
+Scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 px. Define as tokens (`--space-1` … `--space-8`).
 
-- Within a component: 4–16px.
-- Between related elements: 16–24px.
-- Between sections: 48–96px.
-- Separate sections with whitespace only, not borders, boxes, or rules.
-- Exceptions where borders are allowed: form inputs, table rows, `:focus-visible`
-  outlines, and code blocks. These are functional, not decorative.
+- Within a component: 8–16px.
+- Between elements: 16–24px.
+- Between sections: 48–64px.
 
 ## Layout
-- Single column, `max-width: 65ch` for prose, up to `720px` for the container.
-- One focal point per section: one heading, one idea, at most one call to action.
-- Mobile first. Horizontal padding: 24px (mobile), 48px (≥ 640px).
-- Images and media: full column width, no decorative frames or shadows.
+- Single column, max-width: 1200px.
+- Mobile first. Horizontal padding: 24px (mobile), 48px (≥ 768px).
+- At ≥ 768px, schedule uses CSS grid: time column, content column, actions column. Below 768px, vertical layout.
+- No horizontal scroll at 360px. Text wraps. Decorative elements hidden or scaled on narrow screens.
 
 ## Components
 
-### Links
-Accent color, underlined with `text-underline-offset: 0.2em`. Hover uses `--accent-hover`.
+### Background Decoration
+- Fixed position, z-index: -1, pointer-events: none.
+- Navy/royal curved shapes in top corners.
+- Light blue wave at bottom.
+- Dot patterns, dashed lines, and low-contrast blueprint illustration as background textures.
+- White organic-bordered content area in the center.
+
+### Header
+- Title: display font, uppercase, navy, large.
+- Badges: pill-shaped, royal background, white text (program, semester).
+- SKS card: white background, dashed navy border, yellow ribbon label, large navy number.
+- Illustrations: circular icons (laptop, book, plant, graduation cap) with soft shadows.
+
+### Day Groups
+- Day pill: colored background, rounded pill, icon + day name. Navy/royal/purple use white text; teal/green/orange use navy text.
+- "Hari ini" badge: yellow background, navy text, uppercase, pill.
+- Card: white background, thin border, rounded corners, soft shadow.
+- Desktop grid header: navy background, white uppercase text, rounded top corners. Hidden from screen readers if duplicate.
+- Rows alternate with subtle light-blue background tint.
+
+### Course Cards
+- Time: large, bold, royal.
+- Course name: bold, navy. Code in royal.
+- Metadata: caption size, muted.
+- Task badge: yellow background, navy text, pill.
+- Actions: navy primary button (add task), royal outline (edit), subtle outline (delete).
+
+### Tasks
+- Checkbox: clear, 20px.
+- Done items: line-through, muted, with "Selesai" label (green).
+- Due date: orange pill, small.
+- Delete button: outline, hover red.
 
 ### Buttons
-One primary style: accent background, `--bg` text, 8px/16px padding, 4px radius.
-One secondary style: text-only link. No third style.
+- Primary: navy background, white text, pill shape.
+- Secondary: outline, gray border.
+- Destructive: outline, red hover.
+- Focus visible on all interactive elements.
 
-### Focus
-Every interactive element has a visible `:focus-visible` state:
-`outline: 2px solid var(--accent); outline-offset: 2px`. Never remove outlines.
+### Forms and Dialogs
+- Card background, rounded, shadow.
+- Labels: bold, above inputs.
+- Inputs: thin border, rounded, padding.
+- Errors: red text, bold.
+- Conflict warnings: orange dashed border, tinted background.
 
-### Forms
-Visible labels above inputs (no placeholder-only labels). Inputs get a 1px
-border in `--text-muted`. Errors use text plus an icon-free message, never color alone.
-
-### Touch targets
-Minimum 44×44px for anything tappable.
+### Footer
+- Sticky notes: yellow background, rotated slightly, handwritten font, red pushpin SVG.
+- Banner: navy background, white text, italic quote, graduation icons in white circles.
+- Paperclip SVG decoration.
+- Data tools: subtle links at bottom.
 
 ## Motion
 - Allowed: opacity fades, 150–250ms, `ease-out`.
-- Nothing moves on scroll. No parallax, no autoplay, no floating blobs.
-- Under `prefers-reduced-motion: reduce`, disable all transitions and animation.
+- Rotation on sticky notes disabled under `prefers-reduced-motion: reduce`.
+- No scroll-triggered animation, no autoplay.
 
-## Don'ts
-- No emoji as icons
-- No stock illustrations
-- No glassmorphism, blur, or drop shadows
-- No gradient text
-- No identical icon-title-blurb card grids
-- No carousels, modals, or auto-opening popups
-- No decorative animation
+## Decorative Elements
+- All decorative SVG and icons: `aria-hidden="true"`.
+- Icons are inline SVG, styled with currentColor or CSS variables.
+- No external images or fonts.
 
-## Copy
-Write like a person explaining something to a colleague. Short sentences. Concrete verbs.
-
-- Never use: seamless, revolutionize, cutting-edge, unlock, empower, leverage,
-  game-changing, robust, streamline, supercharge.
-- Prefer "use" over "utilize", "help" over "facilitate", "start" over "get started".
-- Buttons and links describe the result: "Read the guide", not "Click here".
-- Do not invent testimonials, stats, names, or claims. Where a fact is missing, write `TODO`.
-- Headings are sentence case.
-
-## Accessibility baseline
-- Semantic HTML first (`header`, `main`, `nav`, `section`, `footer`).
+## Accessibility
+- Semantic HTML.
 - One `h1` per page; headings never skip levels.
-- Alt text on every meaningful image; `alt=""` on decorative ones.
-- Keyboard-navigable in a logical order, with a skip link on multi-section pages.
-- Set `lang` on `<html>`.
+- Alt text on meaningful images; `aria-hidden` on decorative ones.
+- Keyboard-navigable in logical order.
+- Focus visible on all interactive elements.
+- Color contrast checked for all text/background pairs.
 
-## Reference implementation
+## Reference Implementation
 
 ```css
 :root {
-  --bg: #FAF7F2;
-  --text: #2B2620;
-  --text-muted: #6B6155;
-  --accent: #9A6232;
-  --accent-hover: #7E4E24;
+  --navy: #10346F;
+  --royal: #14579A;
+  --light-blue: #DCECF7;
+  --off-white: #F8FAFC;
+  --teal: #20A6A5;
+  --green: #55A64E;
+  --orange: #F2A526;
+  --purple: #7961B2;
+  --yellow: #FFC928;
+  --red: #DC2626;
+  --grid-gray: #E2E8F0;
 
-  --space-1: 4px;  --space-2: 8px;  --space-3: 16px;
-  --space-4: 24px; --space-5: 48px; --space-6: 96px;
-}
+  --bg: var(--off-white);
+  --bg-card: #FFFFFF;
+  --text: #1E293B;
+  --text-on-navy: #FFFFFF;
+  --text-muted: #64748B;
+  --accent: var(--navy);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1C1915;
-    --text: #EDE7DD;
-    --text-muted: #A39889;
-    --accent: #D4A06A;
-    --accent-hover: #E2B584;
-  }
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --space-7: 48px; --space-8: 64px;
+
+  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px;
+  --radius-pill: 999px; --radius-circle: 50%;
+
+  --shadow-soft: 0 2px 8px rgba(16, 52, 111, 0.08);
+  --shadow-medium: 0 4px 16px rgba(16, 52, 111, 0.12);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 1rem/1.6 system-ui, sans-serif;
 }
 
-main { max-width: 65ch; margin-inline: auto; padding: var(--space-5) var(--space-4); }
-
-a { color: var(--accent); text-underline-offset: 0.2em; }
-a:hover { color: var(--accent-hover); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 ```
+
+## Notes
+- SRS 1.2 still references "minimalist" theme. This is a known discrepancy; SRS was not updated as part of this theme change.
